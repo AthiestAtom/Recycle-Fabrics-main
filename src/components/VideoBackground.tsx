@@ -35,25 +35,12 @@ const VideoBackground = () => {
       console.log('Video load started - being optimistic!');
       setIsLoaded(false);
       
-      // Check if we're on GitHub Pages with large file
-      const isGitHubPages = window.location.hostname.includes('github.io');
-      const isLargeFile = true; // We know this is 1.13GB
-      
-      if (isGitHubPages && isLargeFile) {
-        console.log('GitHub Pages detected with large video - using gradient immediately');
-        // GitHub Pages struggles with large files, so don't even try
-        setTimeout(() => {
-          setLoadingTimeout(true);
-        }, 1000); // Very short timeout
-        return;
-      }
-      
-      // For local development, give it more time
+      // Try to load video everywhere - no more GitHub Pages restrictions
       timeoutRef.current = setTimeout(() => {
         console.log('Video timeout, but gracefully switching to gradient');
         setError(null); // Clear any errors - just use gradient
         setLoadingTimeout(true);
-      }, 15000); // 15 seconds for local
+      }, 20000); // 20 seconds - give it more time
     };
 
     const handleProgress = () => {
@@ -106,7 +93,7 @@ const VideoBackground = () => {
         loop
         muted
         playsInline
-        preload="none" // Don't preload until needed
+        preload="auto" // Force preload the video
         className="fixed inset-0 w-full h-full object-cover"
         style={{
           filter: 'blur(1px) brightness(0.7)',
@@ -155,18 +142,18 @@ const VideoBackground = () => {
         }}
       />
 
-      {/* Smart Loading Indicator */}
+      {/* Video Loading Indicator */}
       {!isLoaded && videoAttempted && (
         <div className="fixed inset-0 flex items-center justify-center bg-gradient-to-br from-emerald-600 via-teal-500 to-cyan-400">
           <div className="text-white text-center">
             <div className="text-6xl mb-4 animate-bounce">🎮</div>
             <p className="text-xl font-bold">
-              {loadingTimeout ? 'Using beautiful gradient background' : 'Loading Pokemon Emerald...'}
+              {loadingTimeout ? 'Loading your amazing video... 🎬' : 'Loading Pokemon Emerald Video...'}
             </p>
             <p className="text-sm opacity-75">
               {loadingTimeout 
-                ? 'GitHub Pages loves gradients more than large videos! 🌈' 
-                : 'Getting your amazing experience ready...'}
+                ? 'Your epic video background is worth the wait! �' 
+                : 'Preparing your incredible video experience...'}
             </p>
             <div className="mt-4 flex justify-center gap-2">
               <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
@@ -175,14 +162,14 @@ const VideoBackground = () => {
             </div>
             {loadingTimeout && (
               <div className="mt-4 space-y-2">
-                <p className="text-xs opacity-60">💡 This gradient is still absolutely beautiful!</p>
+                <p className="text-xs opacity-60">💡 Large video files take time but are absolutely worth it!</p>
                 <button
                   onClick={() => {
                     setLoadingTimeout(false); // Just stop the loading indicator
                   }}
                   className="bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-lg border border-white/30 hover:bg-white/30 transition-colors text-sm"
                 >
-                  Continue to App
+                  Continue Without Video
                 </button>
               </div>
             )}
