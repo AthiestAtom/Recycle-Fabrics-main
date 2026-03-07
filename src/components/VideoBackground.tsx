@@ -87,6 +87,17 @@ const VideoBackground = () => {
       if (video.readyState === 0) {
         console.log('Video not loaded, attempting to load...');
         video.load();
+        // Wait a bit for loading to start, then try to play
+        setTimeout(() => {
+          video.play().then(() => {
+            setIsPlaying(true);
+            console.log('Video playing successfully');
+          }).catch(err => {
+            console.log('Video play failed after load:', err);
+            setIsPlaying(false);
+          });
+        }, 1000);
+        return;
       }
       
       // Try to play the video
@@ -95,16 +106,17 @@ const VideoBackground = () => {
         console.log('Video playing successfully');
       }).catch(err => {
         console.log('Video play failed:', err);
-        // Try to reload and play again
-        video.load().then(() => {
-          return video.play();
-        }).then(() => {
-          setIsPlaying(true);
-          console.log('Video playing after reload');
-        }).catch(reloadErr => {
-          console.log('Video still failed after reload:', reloadErr);
-          setIsPlaying(false);
-        });
+        // Try reloading the video
+        video.load();
+        setTimeout(() => {
+          video.play().then(() => {
+            setIsPlaying(true);
+            console.log('Video playing after reload');
+          }).catch(reloadErr => {
+            console.log('Video still failed after reload:', reloadErr);
+            setIsPlaying(false);
+          });
+        }, 2000);
       });
     }
   };
