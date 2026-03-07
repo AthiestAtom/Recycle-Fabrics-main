@@ -71,16 +71,41 @@ const VideoBackground = () => {
 
   const togglePlayPause = () => {
     const video = videoRef.current;
-    if (!video) return;
+    if (!video) {
+      console.log('Video ref not found');
+      return;
+    }
 
+    console.log('Toggle play/pause, current state:', isPlaying, 'video readyState:', video.readyState);
+    
     if (isPlaying) {
       video.pause();
       setIsPlaying(false);
+      console.log('Video paused');
     } else {
-      video.play().catch(err => {
-        setError('Failed to play video');
+      // If video hasn't started loading, try to load it first
+      if (video.readyState === 0) {
+        console.log('Video not loaded, attempting to load...');
+        video.load();
+      }
+      
+      // Try to play the video
+      video.play().then(() => {
+        setIsPlaying(true);
+        console.log('Video playing successfully');
+      }).catch(err => {
+        console.log('Video play failed:', err);
+        // Try to reload and play again
+        video.load().then(() => {
+          return video.play();
+        }).then(() => {
+          setIsPlaying(true);
+          console.log('Video playing after reload');
+        }).catch(reloadErr => {
+          console.log('Video still failed after reload:', reloadErr);
+          setIsPlaying(false);
+        });
       });
-      setIsPlaying(true);
     }
   };
 
