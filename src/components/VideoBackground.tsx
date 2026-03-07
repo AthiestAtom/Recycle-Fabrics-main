@@ -69,89 +69,21 @@ const VideoBackground = () => {
         }}
       />
 
-      {/* Video Loading Indicator */}
-      {!isLoaded && videoAttempted && (
+      {/* Loading indicator for YouTube video */}
+      {!isLoaded && (
         <div className="fixed inset-0 flex items-center justify-center bg-gradient-to-br from-emerald-600 via-teal-500 to-cyan-400">
           <div className="text-white text-center">
             <div className="text-6xl mb-4 animate-bounce">🎮</div>
-            <p className="text-xl font-bold">
-              {loadingTimeout ? 'Loading your amazing video... 🎬' : 'Loading Pokemon Emerald Video...'}
-            </p>
-            <p className="text-sm opacity-75">
-              {loadingTimeout 
-                ? 'Your epic video background is worth the wait! �' 
-                : 'Preparing your incredible video experience...'}
-            </p>
+            <p className="text-xl font-bold">Loading YouTube Video...</p>
+            <p className="text-sm opacity-75">Your epic background is starting...</p>
             <div className="mt-4 flex justify-center gap-2">
               <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
               <div className="w-2 h-2 bg-white rounded-full animate-pulse delay-1000"></div>
               <div className="w-2 h-2 bg-white rounded-full animate-pulse delay-2000"></div>
             </div>
-            {loadingTimeout && (
-              <div className="mt-4 space-y-2">
-                <p className="text-xs opacity-60">💡 Large video files take time but are absolutely worth it!</p>
-                <button
-                  onClick={() => {
-                    setLoadingTimeout(false); // Just stop the loading indicator
-                  }}
-                  className="bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-lg border border-white/30 hover:bg-white/30 transition-colors text-sm"
-                >
-                  Continue Without Video
-                </button>
-              </div>
-            )}
           </div>
         </div>
       )}
-
-      {/* Video Controls */}
-      <div className="fixed bottom-4 right-4 z-50 space-y-2">
-        <button
-          onClick={togglePlayPause}
-          className="bg-black/50 backdrop-blur-sm text-white px-4 py-2 rounded-lg border border-white/20 hover:bg-black/70 transition-colors duration-200 flex items-center gap-2"
-        >
-          {isPlaying ? '⏸️' : '▶️'}
-          <span className="text-sm">{isPlaying ? 'Pause' : 'Play'}</span>
-        </button>
-        
-        {/* Test button for debugging */}
-        <button
-          onClick={() => {
-            const video = videoRef.current;
-            if (video) {
-              console.log('Video element:', video);
-              console.log('Video src:', video.src);
-              console.log('Video readyState:', video.readyState);
-              console.log('Video paused:', video.paused);
-              console.log('Video currentTime:', video.currentTime);
-              console.log('Video duration:', video.duration);
-              
-              // Try direct play
-              video.play().then(() => {
-                console.log('Direct play successful');
-                setIsPlaying(true);
-              }).catch(err => {
-                console.log('Direct play failed:', err);
-                // Try loading first
-                video.load();
-                setTimeout(() => {
-                  video.play().then(() => {
-                    console.log('Play after load successful');
-                    setIsPlaying(true);
-                  }).catch(err2 => {
-                    console.log('Play after load failed:', err2);
-                  });
-                }, 2000);
-              });
-            } else {
-              console.log('No video element found');
-            }
-          }}
-          className="bg-red-500/80 backdrop-blur-sm text-white px-3 py-1 rounded text-xs"
-        >
-          Test Video
-        </button>
-      </div>
 
       {/* Pokemon Emerald Style UI Elements */}
       <div className="fixed top-4 left-4 bg-emerald-800/80 backdrop-blur-sm px-4 py-2 rounded-lg border-2 border-emerald-400 shadow-lg z-40">
