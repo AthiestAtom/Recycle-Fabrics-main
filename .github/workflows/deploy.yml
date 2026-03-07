@@ -28,11 +28,10 @@ jobs:
           node-version: '18'
           cache: 'npm'
 
-      - name: Clean and Install dependencies
+      - name: Install dependencies
         run: |
-          rm -rf node_modules
-          rm -f package-lock.json
-          npm install --force
+          rm -rf node_modules package-lock.json
+          npm ci --prefer-offline --no-audit
 
       - name: Setup environment variables
         run: |
