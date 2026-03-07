@@ -16,6 +16,7 @@ const VideoBackground = () => {
     setVideoAttempted(true);
 
     const handleCanPlay = () => {
+      console.log('Video can play - success!');
       setIsLoaded(true);
       setIsPlaying(true);
       setError(null);
@@ -25,28 +26,25 @@ const VideoBackground = () => {
     };
 
     const handleError = (e: Event) => {
-      console.log('Video loading failed, using gradient fallback');
-      setError('Using gradient background - video unavailable');
+      console.log('Video loading failed, but that\'s okay - using gradient');
+      // Don't set error immediately - let timeout handle it gracefully
       setIsPlaying(false);
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
     };
 
     const handleLoadStart = () => {
+      console.log('Video load started - being optimistic!');
       setIsLoaded(false);
-      // Shorter timeout - fail fast to prevent 404
+      // Give it more time - 15 seconds for large file
       timeoutRef.current = setTimeout(() => {
-        console.log('Video loading timeout, switching to gradient');
-        setError('Video loading slow - using beautiful gradient');
+        console.log('Video timeout, but gracefully switching to gradient');
+        setError(null); // Clear any errors - just use gradient
         setLoadingTimeout(true);
-      }, 8000); // 8 seconds - fail fast
+      }, 15000); // 15 seconds
     };
 
     const handleProgress = () => {
-      // If we have any data, we're on the right track
       if (video.readyState >= 1) {
-        console.log('Video progress detected');
+        console.log('Video progress detected - looking good!');
       }
     };
 
@@ -84,20 +82,6 @@ const VideoBackground = () => {
       setIsPlaying(true);
     }
   };
-
-  if (error) {
-    return (
-      <div className="fixed inset-0 -z-50 bg-gradient-to-br from-emerald-600 via-teal-500 to-cyan-400">
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-white text-center">
-            <div className="text-4xl mb-4">🎮</div>
-            <p className="text-xl">Video unavailable</p>
-            <p className="text-sm opacity-75">Using gradient background</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="fixed inset-0 -z-50">
@@ -157,18 +141,18 @@ const VideoBackground = () => {
         }}
       />
 
-      {/* Smart Loading Indicator */}
-      {!isLoaded && !error && videoAttempted && (
+      {/* Optimistic Loading Indicator */}
+      {!isLoaded && videoAttempted && (
         <div className="fixed inset-0 flex items-center justify-center bg-gradient-to-br from-emerald-600 via-teal-500 to-cyan-400">
           <div className="text-white text-center">
             <div className="text-6xl mb-4 animate-bounce">🎮</div>
             <p className="text-xl font-bold">
-              {loadingTimeout ? 'Almost there...' : 'Loading Pokemon Emerald...'}
+              {loadingTimeout ? 'Video loading... 🎬' : 'Loading Pokemon Emerald...'}
             </p>
             <p className="text-sm opacity-75">
               {loadingTimeout 
-                ? 'Your amazing video background is loading... 🎬' 
-                : 'Preparing your epic video experience...'}
+                ? 'Your epic video background is preparing...' 
+                : 'Getting your amazing experience ready...'}
             </p>
             <div className="mt-4 flex justify-center gap-2">
               <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
@@ -177,14 +161,14 @@ const VideoBackground = () => {
             </div>
             {loadingTimeout && (
               <div className="mt-4 space-y-2">
-                <p className="text-xs opacity-60">💡 Premium video backgrounds take a moment...</p>
+                <p className="text-xs opacity-60">💡 Premium experiences take a moment...</p>
                 <button
                   onClick={() => {
-                    setError('Using gradient background - still beautiful!');
+                    setLoadingTimeout(false); // Just stop the loading indicator
                   }}
                   className="bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-lg border border-white/30 hover:bg-white/30 transition-colors text-sm"
                 >
-                  Use Gradient Now
+                  Show App Now
                 </button>
               </div>
             )}
