@@ -1,24 +1,67 @@
 import React, { useState, useEffect, useRef } from 'react';
 
+declare global {
+  interface Window {
+    YT: any;
+    onYouTubeIframeAPIReady: () => void;
+  }
+}
+
 const VideoBackground = () => {
   const [isLoaded, setIsLoaded] = useState(false);
-  const videoRef = useRef<HTMLIFrameElement>(null);
+  const playerRef = useRef<any>(null);
 
   useEffect(() => {
-    // YouTube iframe loads pretty quickly
-    const timer = setTimeout(() => {
-      setIsLoaded(true);
-    }, 2000); // Give YouTube 2 seconds to load
-    
-    return () => clearTimeout(timer);
+    // Load YouTube API
+    const tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    const firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+
+    // Initialize player when API is ready
+    window.onYouTubeIframeAPIReady = () => {
+      playerRef.current = new window.YT.Player('youtube-player', {
+        videoId: 'owRVh3-eZxM',
+        playerVars: {
+          autoplay: 1,
+          mute: 1,
+          loop: 1,
+          playlist: 'owRVh3-eZxM',
+          controls: 0,
+          showinfo: 0,
+          modestbranding: 1,
+          rel: 0,
+          iv_load_policy: 3,
+          disablekb: 1,
+        },
+        events: {
+          onReady: (event: any) => {
+            // Set playback speed to 8x
+            event.target.setPlaybackRate(8);
+            // Start playing
+            event.target.playVideo();
+            setIsLoaded(true);
+          },
+          onError: (error: any) => {
+            console.log('YouTube player error:', error);
+            setIsLoaded(true); // Still mark as loaded to show gradient
+          }
+        }
+      });
+    };
+
+    return () => {
+      if (playerRef.current) {
+        playerRef.current.destroy();
+      }
+    };
   }, []);
 
   return (
     <div className="fixed inset-0 -z-50">
       {/* YouTube Video Background */}
-      <iframe
-        ref={videoRef}
-        src="https://www.youtube.com/embed/owRVh3-eZxM?autoplay=1&mute=1&loop=1&playlist=owRVh3-eZxM&controls=0&showinfo=0&modestbranding=1&rel=0&iv_load_policy=3&disablekb=1"
+      <div
+        id="youtube-player"
         style={{
           position: 'fixed',
           top: '50%',
@@ -34,9 +77,6 @@ const VideoBackground = () => {
           pointerEvents: 'none',
           zIndex: -1
         }}
-        frameBorder="0"
-        allow="autoplay; encrypted-media; gyroscope; picture-in-picture"
-        allowFullScreen
       />
 
       {/* Gradient background - Always present as safety net */}
