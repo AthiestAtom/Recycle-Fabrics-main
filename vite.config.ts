@@ -17,7 +17,7 @@ export default defineConfig(({ mode }: { mode: string }) => ({
       "@": resolve(__dirname, "./src"),
     },
   },
-  base: mode === 'production' ? '/' : '/',
+  base: mode === 'production' ? '/Recycle-Fabrics-main/' : '/',
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
