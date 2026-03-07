@@ -4,7 +4,9 @@ const VideoBackground = () => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [loadingTimeout, setLoadingTimeout] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const timeoutRef = useRef<NodeJS.Timeout>();
 
   useEffect(() => {
     const video = videoRef.current;
@@ -14,15 +16,26 @@ const VideoBackground = () => {
       setIsLoaded(true);
       setIsPlaying(true);
       setError(null);
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
     };
 
     const handleError = () => {
       setError('Video failed to load');
       setIsPlaying(false);
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
     };
 
     const handleLoadStart = () => {
       setIsLoaded(false);
+      // Set a timeout for video loading (10 seconds)
+      timeoutRef.current = setTimeout(() => {
+        setLoadingTimeout(true);
+        setError('Video loading timeout - using gradient background');
+      }, 10000);
     };
 
     video.addEventListener('canplay', handleCanPlay);
@@ -37,6 +50,9 @@ const VideoBackground = () => {
       video.removeEventListener('canplay', handleCanPlay);
       video.removeEventListener('error', handleError);
       video.removeEventListener('loadstart', handleLoadStart);
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
     };
   }, []);
 
@@ -78,6 +94,7 @@ const VideoBackground = () => {
         loop
         muted
         playsInline
+        preload="metadata"
         className="fixed inset-0 w-full h-full object-cover"
         style={{
           filter: 'blur(1px) brightness(0.7)',
@@ -125,17 +142,31 @@ const VideoBackground = () => {
       />
 
       {/* Loading indicator */}
-      {!isLoaded && (
+      {!isLoaded && !error && (
         <div className="fixed inset-0 flex items-center justify-center bg-gradient-to-br from-emerald-600 via-teal-500 to-cyan-400">
           <div className="text-white text-center">
             <div className="text-6xl mb-4 animate-bounce">🎮</div>
-            <p className="text-xl font-bold">Loading Pokemon Emerald...</p>
-            <p className="text-sm opacity-75">Please wait</p>
+            <p className="text-xl font-bold">
+              {loadingTimeout ? 'Video is large, loading...' : 'Loading Pokemon Emerald...'}
+            </p>
+            <p className="text-sm opacity-75">
+              {loadingTimeout ? 'This may take a moment on slow connections' : 'Please wait'}
+            </p>
             <div className="mt-4 flex justify-center gap-2">
               <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
               <div className="w-2 h-2 bg-white rounded-full animate-pulse delay-1000"></div>
               <div className="w-2 h-2 bg-white rounded-full animate-pulse delay-2000"></div>
             </div>
+            {loadingTimeout && (
+              <button
+                onClick={() => {
+                  setError('Video skipped - using gradient background');
+                }}
+                className="mt-4 bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-lg border border-white/30 hover:bg-white/30 transition-colors"
+              >
+                Skip Video →
+              </button>
+            )}
           </div>
         </div>
       )}
