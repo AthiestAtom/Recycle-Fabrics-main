@@ -96,7 +96,7 @@ const VideoBackground = () => {
 
       {/* Loading indicator for YouTube video */}
       {!isLoaded && (
-        <div className="fixed inset-0 flex items-center justify-center bg-gradient-to-br from-emerald-600 via-teal-500 to-cyan-400">
+        <div className="fixed inset-0 flex items-center justify-center bg-gradient-to-br from-emerald-600 via-teal-500 to-cyan-400" style={{ zIndex: 30 }}>
           <div className="text-white text-center">
             <div className="text-6xl mb-4 animate-bounce">🎮</div>
             <p className="text-xl font-bold">Loading YouTube Video...</p>
@@ -111,23 +111,23 @@ const VideoBackground = () => {
       )}
 
       {/* Pokemon Emerald Style UI Elements */}
-      <div className="fixed top-4 left-4 bg-emerald-800/80 backdrop-blur-sm px-4 py-2 rounded-lg border-2 border-emerald-400 shadow-lg z-40">
+      <div className="fixed top-4 left-4 bg-emerald-800/80 backdrop-blur-sm px-4 py-2 rounded-lg border-2 border-emerald-400 shadow-lg z-40" style={{ zIndex: 50 }}>
         <div className="text-white font-bold text-sm">POKÉMON EMERALD</div>
         <div className="text-emerald-200 text-xs">TEXTILE RECYCLING EDITION</div>
       </div>
       
-      <div className="fixed top-4 right-4 bg-emerald-800/80 backdrop-blur-sm px-4 py-2 rounded-lg border-2 border-emerald-400 shadow-lg z-40">
+      <div className="fixed top-4 right-4 bg-emerald-800/80 backdrop-blur-sm px-4 py-2 rounded-lg border-2 border-emerald-400 shadow-lg z-40" style={{ zIndex: 50 }}>
         <div className="text-white font-bold text-sm">CHANDIGARH REGION</div>
         <div className="text-emerald-200 text-xs">SECTORS: 1-56</div>
       </div>
       
-      <div className="fixed bottom-4 left-4 bg-emerald-800/80 backdrop-blur-sm px-4 py-2 rounded-lg border-2 border-emerald-400 shadow-lg z-40">
+      <div className="fixed bottom-4 left-4 bg-emerald-800/80 backdrop-blur-sm px-4 py-2 rounded-lg border-2 border-emerald-400 shadow-lg z-40" style={{ zIndex: 50 }}>
         <div className="text-white font-bold text-sm">⏱️ TIME: {new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</div>
         <div className="text-emerald-200 text-xs">📍 SECTOR 17</div>
       </div>
 
       {/* Speed Control Button */}
-      <div className="fixed bottom-4 right-4 z-50">
+      <div className="fixed bottom-4 right-4 z-50" style={{ zIndex: 100 }}>
         <button
           onClick={trySetSpeed}
           className="bg-blue-600/80 backdrop-blur-sm text-white px-4 py-2 rounded-lg border border-blue-400 hover:bg-blue-700/80 transition-colors duration-200 flex items-center gap-2"
