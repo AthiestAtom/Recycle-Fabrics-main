@@ -2,152 +2,42 @@ import React, { useState, useEffect, useRef } from 'react';
 
 const VideoBackground = () => {
   const [isLoaded, setIsLoaded] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [loadingTimeout, setLoadingTimeout] = useState(false);
-  const [videoAttempted, setVideoAttempted] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const timeoutRef = useRef<NodeJS.Timeout>();
+  const videoRef = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    setVideoAttempted(true);
-
-    const handleCanPlay = () => {
-      console.log('Video can play - success!');
+    // YouTube iframe loads pretty quickly
+    const timer = setTimeout(() => {
       setIsLoaded(true);
-      setIsPlaying(true);
-      setError(null);
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-
-    const handleError = (e: Event) => {
-      console.log('Video loading failed, but that\'s okay - using gradient');
-      // Don't set error immediately - let timeout handle it gracefully
-      setIsPlaying(false);
-    };
-
-    const handleLoadStart = () => {
-      console.log('Video load started - being optimistic!');
-      setIsLoaded(false);
-      
-      // Try to load video everywhere - no more GitHub Pages restrictions
-      timeoutRef.current = setTimeout(() => {
-        console.log('Video timeout, but gracefully switching to gradient');
-        setError(null); // Clear any errors - just use gradient
-        setLoadingTimeout(true);
-      }, 20000); // 20 seconds - give it more time
-    };
-
-    const handleProgress = () => {
-      if (video.readyState >= 1) {
-        console.log('Video progress detected - looking good!');
-      }
-    };
-
-    video.addEventListener('canplay', handleCanPlay);
-    video.addEventListener('error', handleError);
-    video.addEventListener('loadstart', handleLoadStart);
-    video.addEventListener('progress', handleProgress);
-
-    // Set video properties for optimization
-    video.playbackRate = 8.0;
-    video.volume = 0;
-
-    return () => {
-      video.removeEventListener('canplay', handleCanPlay);
-      video.removeEventListener('error', handleError);
-      video.removeEventListener('loadstart', handleLoadStart);
-      video.removeEventListener('progress', handleProgress);
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-  }, []);
-
-  const togglePlayPause = () => {
-    const video = videoRef.current;
-    if (!video) {
-      console.log('Video ref not found');
-      return;
-    }
-
-    console.log('Toggle play/pause, current state:', isPlaying, 'video readyState:', video.readyState);
+    }, 2000); // Give YouTube 2 seconds to load
     
-    if (isPlaying) {
-      video.pause();
-      setIsPlaying(false);
-      console.log('Video paused');
-    } else {
-      // If video hasn't started loading, try to load it first
-      if (video.readyState === 0) {
-        console.log('Video not loaded, attempting to load...');
-        video.load();
-        // Wait a bit for loading to start, then try to play
-        setTimeout(() => {
-          video.play().then(() => {
-            setIsPlaying(true);
-            console.log('Video playing successfully');
-          }).catch(err => {
-            console.log('Video play failed after load:', err);
-            setIsPlaying(false);
-          });
-        }, 1000);
-        return;
-      }
-      
-      // Try to play the video
-      video.play().then(() => {
-        setIsPlaying(true);
-        console.log('Video playing successfully');
-      }).catch(err => {
-        console.log('Video play failed:', err);
-        // Try reloading the video
-        video.load();
-        setTimeout(() => {
-          video.play().then(() => {
-            setIsPlaying(true);
-            console.log('Video playing after reload');
-          }).catch(reloadErr => {
-            console.log('Video still failed after reload:', reloadErr);
-            setIsPlaying(false);
-          });
-        }, 2000);
-      });
-    }
-  };
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <div className="fixed inset-0 -z-50">
-      {/* Video Background - Smart Loading */}
-      <video
+      {/* YouTube Video Background */}
+      <iframe
         ref={videoRef}
-        autoPlay
-        loop
-        muted
-        playsInline
-        preload="auto" // Force preload the video
-        className="fixed inset-0 w-full h-full object-cover"
+        src="https://www.youtube.com/embed/owRVh3-eZxM?autoplay=1&mute=1&loop=1&playlist=owRVh3-eZxM&controls=0&showinfo=0&modestbranding=1&rel=0&iv_load_policy=3&disablekb=1"
         style={{
-          filter: 'blur(1px) brightness(0.7)',
-          transform: 'scale(1.05)',
-          opacity: isLoaded ? 0.8 : (isPlaying ? 0.3 : 0.1),
-          transition: 'opacity 2s ease-in-out',
           position: 'fixed',
-          top: 0,
-          left: 0,
+          top: '50%',
+          left: '50%',
           width: '100vw',
-          height: '100vh',
+          height: '56.25vw', // 16:9 aspect ratio
+          minWidth: '177.77vh',
+          minHeight: '100vh',
+          transform: 'translate(-50%, -50%) scale(1.1)',
+          filter: 'blur(1px) brightness(0.7)',
+          opacity: isLoaded ? 0.8 : 0,
+          transition: 'opacity 2s ease-in-out',
+          pointerEvents: 'none',
           zIndex: -1
         }}
-      >
-        <source src="/videoplayback.mp4" type="video/mp4" />
-        Your browser does not support the video tag.
-      </video>
+        frameBorder="0"
+        allow="autoplay; encrypted-media; gyroscope; picture-in-picture"
+        allowFullScreen
+      />
 
       {/* Gradient background - Always present as safety net */}
       <div 
