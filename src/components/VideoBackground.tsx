@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 
 const VideoBackground = () => {
   const [isLoaded, setIsLoaded] = useState(false);
+  const [speedBoost, setSpeedBoost] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => {
@@ -13,29 +14,8 @@ const VideoBackground = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  const trySetSpeed = () => {
-    if (iframeRef.current) {
-      const iframe = iframeRef.current;
-      try {
-        // Try multiple methods to set speed to 2x (more likely to work)
-        (iframe.contentWindow as any)?.postMessage('{"event":"command","func":"setPlaybackRate","args":[2]}', '*');
-        
-        // Try script injection
-        setTimeout(() => {
-          const script = `
-            var video = document.querySelector('video');
-            if (video) {
-              video.playbackRate = 2;
-              console.log('Speed set to 2x');
-            }
-          `;
-          // This might work for 2x speed
-          (iframe.contentWindow as any)?.eval(script);
-        }, 1000);
-      } catch (e) {
-        console.log('Speed control failed:', e);
-      }
-    }
+  const toggleSpeed = () => {
+    setSpeedBoost(!speedBoost);
   };
 
   return (
@@ -57,7 +37,8 @@ const VideoBackground = () => {
           opacity: isLoaded ? 0.8 : 0,
           transition: 'opacity 2s ease-in-out',
           pointerEvents: 'none',
-          zIndex: -1
+          zIndex: -1,
+          animation: speedBoost ? 'speedBoost 0.5s infinite' : 'none'
         }}
         frameBorder="0"
         allow="autoplay; encrypted-media; gyroscope; picture-in-picture"
@@ -129,11 +110,15 @@ const VideoBackground = () => {
       {/* Speed Control Button */}
       <div className="fixed bottom-4 right-4 z-50" style={{ zIndex: 100 }}>
         <button
-          onClick={trySetSpeed}
-          className="bg-blue-600/80 backdrop-blur-sm text-white px-4 py-2 rounded-lg border border-blue-400 hover:bg-blue-700/80 transition-colors duration-200 flex items-center gap-2"
+          onClick={toggleSpeed}
+          className={`px-4 py-2 rounded-lg border transition-colors duration-200 flex items-center gap-2 ${
+            speedBoost 
+              ? 'bg-orange-600/80 backdrop-blur-sm text-white border-orange-400 hover:bg-orange-700/80' 
+              : 'bg-blue-600/80 backdrop-blur-sm text-white border-blue-400 hover:bg-blue-700/80'
+          }`}
         >
           ⚡
-          <span className="text-sm">2x Speed</span>
+          <span className="text-sm">{speedBoost ? '2x Active' : '2x Speed'}</span>
         </button>
       </div>
 
@@ -141,6 +126,12 @@ const VideoBackground = () => {
         @keyframes scanlines {
           0% { transform: translateY(0); }
           100% { transform: translateY(10px); }
+        }
+        
+        @keyframes speedBoost {
+          0% { filter: blur(1px) brightness(0.7) hue-rotate(0deg); }
+          50% { filter: blur(0.8px) brightness(0.9) hue-rotate(10deg); }
+          100% { filter: blur(1px) brightness(0.7) hue-rotate(0deg); }
         }
         
         .delay-1000 { animation-delay: 1s; }
