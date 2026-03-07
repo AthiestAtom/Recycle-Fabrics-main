@@ -1,72 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 
 const VideoBackground = () => {
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(true); // Start as loaded
   const [isPlaying, setIsPlaying] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>('Video disabled for performance'); // Start with error
   const [loadingTimeout, setLoadingTimeout] = useState(false);
-  const [canShowVideo, setCanShowVideo] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout>();
 
   useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    const handleCanPlay = () => {
-      setIsLoaded(true);
-      setIsPlaying(true);
-      setError(null);
-      setCanShowVideo(true);
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-
-    const handleError = () => {
-      setError('Video failed to load - using gradient background');
-      setIsPlaying(false);
-      setCanShowVideo(false);
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-
-    const handleLoadStart = () => {
-      setIsLoaded(false);
-      setCanShowVideo(false);
-      // Set a timeout for video loading (15 seconds for large file)
-      timeoutRef.current = setTimeout(() => {
-        setLoadingTimeout(true);
-        setError('Video is loading... This may take a moment on slow connections');
-      }, 15000);
-    };
-
-    const handleProgress = () => {
-      // Show video if we have some data loaded
-      if (video.readyState >= 2) {
-        setCanShowVideo(true);
-      }
-    };
-
-    video.addEventListener('canplay', handleCanPlay);
-    video.addEventListener('error', handleError);
-    video.addEventListener('loadstart', handleLoadStart);
-    video.addEventListener('progress', handleProgress);
-
-    // Set video properties for optimization
-    video.playbackRate = 8.0; // 8x speed for fast-paced action
-    video.volume = 0; // Muted for background
-
-    return () => {
-      video.removeEventListener('canplay', handleCanPlay);
-      video.removeEventListener('error', handleError);
-      video.removeEventListener('loadstart', handleLoadStart);
-      video.removeEventListener('progress', handleProgress);
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
+    // Video is disabled for performance - 1.13GB file is too large
+    return;
   }, []);
 
   const togglePlayPause = () => {
@@ -100,34 +44,6 @@ const VideoBackground = () => {
 
   return (
     <div className="fixed inset-0 -z-50">
-      {/* Video Background - Full Screen */}
-      {canShowVideo && (
-        <video
-          ref={videoRef}
-          autoPlay
-          loop
-          muted
-          playsInline
-          preload="metadata"
-          className="fixed inset-0 w-full h-full object-cover"
-          style={{
-            filter: 'blur(1px) brightness(0.7)',
-            transform: 'scale(1.05)',
-            opacity: isLoaded ? 0.8 : 0.3,
-            transition: 'opacity 3s ease-in-out',
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            width: '100vw',
-            height: '100vh',
-            zIndex: -1
-          }}
-        >
-          <source src="/videoplayback.mp4" type="video/mp4" />
-          Your browser does not support the video tag.
-        </video>
-      )}
-
       {/* Gradient background - always present as fallback */}
       <div 
         className="fixed inset-0 bg-gradient-to-br from-emerald-600 via-teal-500 to-cyan-400"
@@ -137,9 +53,7 @@ const VideoBackground = () => {
           left: 0,
           width: '100vw',
           height: '100vh',
-          zIndex: -2,
-          opacity: canShowVideo && isLoaded ? 0 : 1,
-          transition: 'opacity 2s ease-in-out'
+          zIndex: -1
         }}
       />
       
@@ -157,41 +71,6 @@ const VideoBackground = () => {
           animation: 'scanlines 8s linear infinite'
         }}
       />
-
-      {/* Loading indicator */}
-      {!isLoaded && !error && (
-        <div className="fixed inset-0 flex items-center justify-center bg-gradient-to-br from-emerald-600 via-teal-500 to-cyan-400">
-          <div className="text-white text-center">
-            <div className="text-6xl mb-4 animate-bounce">🎮</div>
-            <p className="text-xl font-bold">
-              {loadingTimeout ? 'Loading HD Video Background...' : 'Loading Pokemon Emerald...'}
-            </p>
-            <p className="text-sm opacity-75">
-              {loadingTimeout 
-                ? 'The video file is 1.13GB - this may take 30-60 seconds on slow connections' 
-                : 'Please wait - amazing background video loading...'}
-            </p>
-            <div className="mt-4 flex justify-center gap-2">
-              <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
-              <div className="w-2 h-2 bg-white rounded-full animate-pulse delay-1000"></div>
-              <div className="w-2 h-2 bg-white rounded-full animate-pulse delay-2000"></div>
-            </div>
-            {loadingTimeout && (
-              <div className="mt-4 space-y-2">
-                <p className="text-xs opacity-60">💡 Tip: The video is worth the wait!</p>
-                <button
-                  onClick={() => {
-                    setError('Video skipped - using gradient background');
-                  }}
-                  className="bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-lg border border-white/30 hover:bg-white/30 transition-colors text-sm"
-                >
-                  Skip Video →
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
 
       {/* Video Controls */}
       <div className="fixed bottom-4 right-4 z-50">
