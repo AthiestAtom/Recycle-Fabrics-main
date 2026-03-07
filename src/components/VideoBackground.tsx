@@ -135,7 +135,7 @@ const VideoBackground = () => {
         style={{
           filter: 'blur(1px) brightness(0.7)',
           transform: 'scale(1.05)',
-          opacity: isLoaded ? 0.8 : 0,
+          opacity: isLoaded ? 0.8 : (isPlaying ? 0.3 : 0.1),
           transition: 'opacity 2s ease-in-out',
           position: 'fixed',
           top: 0,
@@ -215,13 +215,51 @@ const VideoBackground = () => {
       )}
 
       {/* Video Controls */}
-      <div className="fixed bottom-4 right-4 z-50">
+      <div className="fixed bottom-4 right-4 z-50 space-y-2">
         <button
           onClick={togglePlayPause}
           className="bg-black/50 backdrop-blur-sm text-white px-4 py-2 rounded-lg border border-white/20 hover:bg-black/70 transition-colors duration-200 flex items-center gap-2"
         >
           {isPlaying ? '⏸️' : '▶️'}
           <span className="text-sm">{isPlaying ? 'Pause' : 'Play'}</span>
+        </button>
+        
+        {/* Test button for debugging */}
+        <button
+          onClick={() => {
+            const video = videoRef.current;
+            if (video) {
+              console.log('Video element:', video);
+              console.log('Video src:', video.src);
+              console.log('Video readyState:', video.readyState);
+              console.log('Video paused:', video.paused);
+              console.log('Video currentTime:', video.currentTime);
+              console.log('Video duration:', video.duration);
+              
+              // Try direct play
+              video.play().then(() => {
+                console.log('Direct play successful');
+                setIsPlaying(true);
+              }).catch(err => {
+                console.log('Direct play failed:', err);
+                // Try loading first
+                video.load();
+                setTimeout(() => {
+                  video.play().then(() => {
+                    console.log('Play after load successful');
+                    setIsPlaying(true);
+                  }).catch(err2 => {
+                    console.log('Play after load failed:', err2);
+                  });
+                }, 2000);
+              });
+            } else {
+              console.log('No video element found');
+            }
+          }}
+          className="bg-red-500/80 backdrop-blur-sm text-white px-3 py-1 rounded text-xs"
+        >
+          Test Video
         </button>
       </div>
 
