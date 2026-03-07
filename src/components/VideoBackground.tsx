@@ -1,67 +1,62 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-declare global {
-  interface Window {
-    YT: any;
-    onYouTubeIframeAPIReady: () => void;
-  }
-}
-
 const VideoBackground = () => {
   const [isLoaded, setIsLoaded] = useState(false);
-  const playerRef = useRef<any>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => {
-    // Load YouTube API
-    const tag = document.createElement('script');
-    tag.src = 'https://www.youtube.com/iframe_api';
-    const firstScriptTag = document.getElementsByTagName('script')[0];
-    firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
-
-    // Initialize player when API is ready
-    window.onYouTubeIframeAPIReady = () => {
-      playerRef.current = new window.YT.Player('youtube-player', {
-        videoId: 'owRVh3-eZxM',
-        playerVars: {
-          autoplay: 1,
-          mute: 1,
-          loop: 1,
-          playlist: 'owRVh3-eZxM',
-          controls: 0,
-          showinfo: 0,
-          modestbranding: 1,
-          rel: 0,
-          iv_load_policy: 3,
-          disablekb: 1,
-        },
-        events: {
-          onReady: (event: any) => {
-            // Set playback speed to 8x
-            event.target.setPlaybackRate(8);
-            // Start playing
-            event.target.playVideo();
-            setIsLoaded(true);
-          },
-          onError: (error: any) => {
-            console.log('YouTube player error:', error);
-            setIsLoaded(true); // Still mark as loaded to show gradient
+    // Wait for iframe to load, then inject JavaScript to set speed
+    const timer = setTimeout(() => {
+      if (iframeRef.current) {
+        const iframe = iframeRef.current;
+        iframe.onload = () => {
+          // Inject JavaScript to set playback speed
+          const script = `
+            var video = document.querySelector('video');
+            if (video) {
+              video.playbackRate = 8;
+              video.play();
+            }
+          `;
+          
+          // Try to inject script into iframe using postMessage
+          try {
+            (iframe.contentWindow as any)?.postMessage({
+              event: 'command',
+              func: 'setPlaybackRate',
+              args: [8]
+            }, '*');
+            
+            // Also try direct script injection
+            setTimeout(() => {
+              const script = document.createElement('script');
+              script.textContent = `
+                var video = document.querySelector('video');
+                if (video) {
+                  video.playbackRate = 8;
+                  console.log('Video speed set to 8x');
+                }
+              `;
+              iframe.contentDocument?.body.appendChild(script);
+            }, 1000);
+          } catch (e) {
+            console.log('Could not control video speed:', e);
           }
-        }
-      });
-    };
-
-    return () => {
-      if (playerRef.current) {
-        playerRef.current.destroy();
+          
+          setIsLoaded(true);
+        };
       }
-    };
+    }, 3000); // Give more time for YouTube to load
+    
+    return () => clearTimeout(timer);
   }, []);
 
   return (
     <div className="fixed inset-0 -z-50">
       {/* YouTube Video Background */}
-      <div
-        id="youtube-player"
+      <iframe
+        ref={iframeRef}
+        src="https://www.youtube.com/embed/owRVh3-eZxM?autoplay=1&mute=1&loop=1&playlist=owRVh3-eZxM&controls=0&showinfo=0&modestbranding=1&rel=0&iv_load_policy=3&disablekb=1"
         style={{
           position: 'fixed',
           top: '50%',
@@ -77,6 +72,9 @@ const VideoBackground = () => {
           pointerEvents: 'none',
           zIndex: -1
         }}
+        frameBorder="0"
+        allow="autoplay; encrypted-media; gyroscope; picture-in-picture"
+        allowFullScreen
       />
 
       {/* Gradient background - Always present as safety net */}
