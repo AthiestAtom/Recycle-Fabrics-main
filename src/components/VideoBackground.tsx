@@ -5,51 +5,38 @@ const VideoBackground = () => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => {
-    // Wait for iframe to load, then inject JavaScript to set speed
+    // YouTube iframe loads pretty quickly
     const timer = setTimeout(() => {
-      if (iframeRef.current) {
-        const iframe = iframeRef.current;
-        iframe.onload = () => {
-          // Inject JavaScript to set playback speed
+      setIsLoaded(true);
+    }, 2000);
+    
+    return () => clearTimeout(timer);
+  }, []);
+
+  const trySetSpeed = () => {
+    if (iframeRef.current) {
+      const iframe = iframeRef.current;
+      try {
+        // Try multiple methods to set speed
+        (iframe.contentWindow as any)?.postMessage('{"event":"command","func":"setPlaybackRate","args":[8]}', '*');
+        
+        // Try script injection
+        setTimeout(() => {
           const script = `
             var video = document.querySelector('video');
             if (video) {
               video.playbackRate = 8;
-              video.play();
+              console.log('Speed set to 8x');
             }
           `;
-          
-          // Try to inject script into iframe using postMessage
-          try {
-            (iframe.contentWindow as any)?.postMessage({
-              event: 'command',
-              func: 'setPlaybackRate',
-              args: [8]
-            }, '*');
-            
-            // Also try direct script injection
-            setTimeout(() => {
-              const script = document.createElement('script');
-              script.textContent = `
-                var video = document.querySelector('video');
-                if (video) {
-                  video.playbackRate = 8;
-                  console.log('Video speed set to 8x');
-                }
-              `;
-              iframe.contentDocument?.body.appendChild(script);
-            }, 1000);
-          } catch (e) {
-            console.log('Could not control video speed:', e);
-          }
-          
-          setIsLoaded(true);
-        };
+          // This likely won't work due to CORS, but worth trying
+          (iframe.contentWindow as any)?.eval(script);
+        }, 1000);
+      } catch (e) {
+        console.log('Speed control failed:', e);
       }
-    }, 3000); // Give more time for YouTube to load
-    
-    return () => clearTimeout(timer);
-  }, []);
+    }
+  };
 
   return (
     <div className="fixed inset-0 -z-50">
@@ -137,6 +124,17 @@ const VideoBackground = () => {
       <div className="fixed bottom-4 left-4 bg-emerald-800/80 backdrop-blur-sm px-4 py-2 rounded-lg border-2 border-emerald-400 shadow-lg z-40">
         <div className="text-white font-bold text-sm">⏱️ TIME: {new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</div>
         <div className="text-emerald-200 text-xs">📍 SECTOR 17</div>
+      </div>
+
+      {/* Speed Control Button */}
+      <div className="fixed bottom-4 right-4 z-50">
+        <button
+          onClick={trySetSpeed}
+          className="bg-purple-600/80 backdrop-blur-sm text-white px-4 py-2 rounded-lg border border-purple-400 hover:bg-purple-700/80 transition-colors duration-200 flex items-center gap-2"
+        >
+          ⚡
+          <span className="text-sm">8x Speed</span>
+        </button>
       </div>
 
       <style>{`
