@@ -1,59 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 
 const VideoBackground = () => {
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(true); // Start as loaded
   const [isPlaying, setIsPlaying] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>('Video disabled for performance'); // Start with error
   const [loadingTimeout, setLoadingTimeout] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout>();
 
   useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    const handleCanPlay = () => {
-      setIsLoaded(true);
-      setIsPlaying(true);
-      setError(null);
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-
-    const handleError = () => {
-      setError('Video failed to load');
-      setIsPlaying(false);
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-
-    const handleLoadStart = () => {
-      setIsLoaded(false);
-      // Set a timeout for video loading (10 seconds)
-      timeoutRef.current = setTimeout(() => {
-        setLoadingTimeout(true);
-        setError('Video loading timeout - using gradient background');
-      }, 10000);
-    };
-
-    video.addEventListener('canplay', handleCanPlay);
-    video.addEventListener('error', handleError);
-    video.addEventListener('loadstart', handleLoadStart);
-
-    // Set video properties for optimization
-    video.playbackRate = 8.0; // 8x speed for fast-paced action
-    video.volume = 0; // Muted for background
-
-    return () => {
-      video.removeEventListener('canplay', handleCanPlay);
-      video.removeEventListener('error', handleError);
-      video.removeEventListener('loadstart', handleLoadStart);
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
+    // Video is disabled for performance - 1.13GB file is too large
+    return;
   }, []);
 
   const togglePlayPause = () => {
