@@ -17,19 +17,19 @@ const VideoBackground = () => {
     if (iframeRef.current) {
       const iframe = iframeRef.current;
       try {
-        // Try multiple methods to set speed
-        (iframe.contentWindow as any)?.postMessage('{"event":"command","func":"setPlaybackRate","args":[8]}', '*');
+        // Try multiple methods to set speed to 2x (more likely to work)
+        (iframe.contentWindow as any)?.postMessage('{"event":"command","func":"setPlaybackRate","args":[2]}', '*');
         
         // Try script injection
         setTimeout(() => {
           const script = `
             var video = document.querySelector('video');
             if (video) {
-              video.playbackRate = 8;
-              console.log('Speed set to 8x');
+              video.playbackRate = 2;
+              console.log('Speed set to 2x');
             }
           `;
-          // This likely won't work due to CORS, but worth trying
+          // This might work for 2x speed
           (iframe.contentWindow as any)?.eval(script);
         }, 1000);
       } catch (e) {
@@ -130,10 +130,10 @@ const VideoBackground = () => {
       <div className="fixed bottom-4 right-4 z-50">
         <button
           onClick={trySetSpeed}
-          className="bg-purple-600/80 backdrop-blur-sm text-white px-4 py-2 rounded-lg border border-purple-400 hover:bg-purple-700/80 transition-colors duration-200 flex items-center gap-2"
+          className="bg-blue-600/80 backdrop-blur-sm text-white px-4 py-2 rounded-lg border border-blue-400 hover:bg-blue-700/80 transition-colors duration-200 flex items-center gap-2"
         >
           ⚡
-          <span className="text-sm">8x Speed</span>
+          <span className="text-sm">2x Speed</span>
         </button>
       </div>
 
