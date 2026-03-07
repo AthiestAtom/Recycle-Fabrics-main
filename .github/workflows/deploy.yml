@@ -2,9 +2,9 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main ]
   pull_request:
-    branches: [ main, master ]
+    branches: [ main ]
 
 permissions:
   contents: read
@@ -25,17 +25,11 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
           cache: 'npm'
 
       - name: Install dependencies
-        run: |
-          rm -rf node_modules package-lock.json
-          npm ci --prefer-offline --no-audit
-
-      - name: Setup environment variables
-        run: |
-          echo "VITE_API_URL=https://athiestatom.github.io/Recycle-Fabrics-main" >> $GITHUB_ENV
+        run: npm ci
 
       - name: Build application
         run: npm run build

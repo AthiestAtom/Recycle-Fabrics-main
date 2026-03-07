@@ -320,8 +320,12 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
       const formData = new FormData();
       formData.append('image', selectedFile);
 
-      // Call local backend API
-      const response = await fetch('http://localhost:3001/api/classify-fabric', {
+      // Call backend API
+      const apiUrl = import.meta.env.PROD 
+        ? 'https://your-backend-domain.com/api/classify-fabric' // Replace with your deployed backend URL
+        : 'http://localhost:3001/api/classify-fabric';
+      
+      const response = await fetch(apiUrl, {
         method: 'POST',
         body: formData,
       });
