@@ -409,13 +409,15 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
               </div>
             </div>
 
-            <a
-              href="/#classify"
-              className="inline-flex items-center gap-4 mt-20 px-12 py-6 bg-gradient-to-r from-emerald-400 to-teal-400 text-white font-bold rounded-3xl shadow-2xl hover:shadow-3xl transform hover:-translate-y-2 transition-all duration-300 text-xl hover:from-emerald-300 hover:to-teal-300"
-            >
-              Try it now
-              <ArrowDown className="w-6 h-6 animate-bounce" />
-            </a>
+            <div className="flex justify-center">
+              <Button 
+                onClick={() => window.scrollTo({ top: document.getElementById('classify')?.offsetTop || 0, behavior: 'smooth' })}
+                className="inline-flex items-center gap-4 mt-20 px-12 py-6 bg-gradient-to-r from-emerald-400 to-teal-400 text-white font-bold rounded-3xl shadow-2xl hover:shadow-3xl transform hover:-translate-y-2 transition-all duration-300 text-xl hover:from-emerald-300 hover:to-teal-300"
+              >
+                Try it now
+                <ArrowDown className="w-6 h-6 animate-bounce" />
+              </Button>
+            </div>
           </div>
         </div>
       </section>
