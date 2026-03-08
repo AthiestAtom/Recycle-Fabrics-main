@@ -410,7 +410,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
             </div>
 
             <a
-              href="#classify"
+              href="/#classify"
               className="inline-flex items-center gap-4 mt-20 px-12 py-6 bg-gradient-to-r from-emerald-400 to-teal-400 text-white font-bold rounded-3xl shadow-2xl hover:shadow-3xl transform hover:-translate-y-2 transition-all duration-300 text-xl hover:from-emerald-300 hover:to-teal-300"
             >
               Try it now
