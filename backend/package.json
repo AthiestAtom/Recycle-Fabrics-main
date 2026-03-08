@@ -1,14 +1,14 @@
 {
-  "name": "backend",
+  "name": "fabric-classifier-api",
   "version": "1.0.0",
-  "description": "",
+  "description": "Fabric classification API using Google Gemini",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "build": "echo 'No build step needed'"
   },
-  "keywords": [],
+  "keywords": ["fabric", "classification", "gemini", "ai", "recycling"],
   "author": "",
   "license": "ISC",
   "dependencies": {
@@ -19,5 +19,8 @@
   },
   "devDependencies": {
     "nodemon": "^3.1.14"
+  },
+  "engines": {
+    "node": ">=16.0.0"
   }
 }

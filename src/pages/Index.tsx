@@ -324,7 +324,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
       const isDevelopment = import.meta.env.DEV;
       const apiUrl = isDevelopment 
         ? 'http://localhost:3001/api/classify-fabric'
-        : `https://${import.meta.env.VITE_API_URL || 'athiestatom.github.io/Recycle-Fabrics-main'}/api/classify-fabric`;
+        : 'https://fabric-classifier-api.onrender.com/api/classify-fabric';
       
       const response = await fetch(apiUrl, {
         method: 'POST',
