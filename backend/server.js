@@ -68,13 +68,6 @@ const classifyFabric = async (imageBuffer) => {
         "Research local recycling options"
       ]
     };
-        "Cut into small pieces before composting",
-        "Remove any non-biodegradable attachments",
-        "Mix with other organic materials for better composting",
-        "Use in home compost bin or municipal facility"
-      ]
-    };
-    */
   } catch (error) {
     console.error('Classification error:', error);
     throw error;
