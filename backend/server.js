@@ -29,25 +29,11 @@ const classifyFabric = async (imageBuffer) => {
   try {
     console.log('Classifying fabric with image buffer size:', imageBuffer.length);
     
-    // For now, return a mock response to test the backend
-    return {
-      fabric_type: "Cotton",
-      recycling_method: "Composting",
-      confidence: 0.85,
-      description: "This is a cotton fabric that can be composted or recycled into new textiles.",
-      tips: [
-        "Cut into small pieces before composting",
-        "Remove any non-biodegradable attachments",
-        "Mix with other organic materials for better composting",
-        "Use in home compost bin or municipal facility"
-      ]
-    };
-    
-    // TODO: Add actual Gemini API call later
-    /*
+    // Convert image buffer to base64
     const base64Image = imageBuffer.toString('base64');
     const mimeType = 'image/jpeg';
     
+    // Call Google Gemini API
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
       method: 'POST',
       headers: {
@@ -67,7 +53,41 @@ const classifyFabric = async (imageBuffer) => {
     });
     
     const data = await response.json();
-    return data.candidates[0].content.parts[0].text;
+    
+    // Parse the response to extract the classification data
+    const text = data.candidates[0].content.parts[0].text;
+    const classificationData = JSON.parse(text);
+    
+    console.log('Gemini API response:', classificationData);
+    
+    // Return the classification data
+    return {
+      fabric_type: classificationData.fabric_type || "Unknown",
+      recycling_method: classificationData.recycling_method || "Standard recycling",
+      confidence: classificationData.confidence || 0.5,
+      description: classificationData.description || "Unable to classify this fabric.",
+      tips: [
+        "Check fabric care labels before washing",
+        "Consider donating usable fabrics",
+        "Research local recycling options"
+      ]
+    };
+    
+    // TODO: Remove this mock response section
+    /*
+    // For now, return a mock response to test the backend
+    return {
+      fabric_type: "Cotton",
+      recycling_method: "Composting",
+      confidence: 0.85,
+      description: "This is a cotton fabric that can be composted or recycled into new textiles.",
+      tips: [
+        "Cut into small pieces before composting",
+        "Remove any non-biodegradable attachments",
+        "Mix with other organic materials for better composting",
+        "Use in home compost bin or municipal facility"
+      ]
+    };
     */
   } catch (error) {
     console.error('Classification error:', error);
