@@ -342,10 +342,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
       console.error("Classification error:", err);
       toast.error(err.message || "Failed to classify fabric. Please try again.");
     } finally {
-      // Only set analyzing to false if it was true to begin with
-      if (isAnalyzing) {
-        setIsAnalyzing(false);
-      }
+      setIsAnalyzing(false);
     }
   };
 
