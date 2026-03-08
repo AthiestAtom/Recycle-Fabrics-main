@@ -28,10 +28,14 @@ const upload = multer({ storage });
 const classifyFabric = async (imageBuffer) => {
   try {
     console.log('Classifying fabric with image buffer size:', imageBuffer.length);
+    console.log('Image buffer type:', typeof imageBuffer);
     
     // Convert image buffer to base64
     const base64Image = imageBuffer.toString('base64');
     const mimeType = 'image/jpeg';
+    
+    console.log('Base64 image length:', base64Image.length);
+    console.log('API Key exists:', !!GEMINI_API_KEY);
     
     // Call Google Gemini API
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
@@ -52,11 +56,19 @@ const classifyFabric = async (imageBuffer) => {
       })
     });
     
+    console.log('Gemini response status:', response.status);
+    console.log('Gemini response headers:', response.headers);
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.log('Gemini error response:', errorText);
+      throw new Error(`Gemini API error: ${response.status} - ${errorText}`);
+    }
+    
     const data = await response.json();
+    console.log('Gemini response data:', data);
     
-    console.log('Gemini API response:', data);
-    
-    // Return the classification data
+    // Return classification data
     return {
       fabric_type: data.candidates?.[0]?.content?.parts?.[0]?.text || "Unknown",
       recycling_method: data.candidates?.[0]?.content?.parts?.[0]?.text || "Standard recycling",
@@ -68,8 +80,10 @@ const classifyFabric = async (imageBuffer) => {
         "Research local recycling options"
       ]
     };
+    
   } catch (error) {
     console.error('Classification error:', error);
+    console.error('Error stack:', error.stack);
     throw error;
   }
 };
@@ -78,16 +92,27 @@ const classifyFabric = async (imageBuffer) => {
 app.post('/api/classify-fabric', upload.single('image'), async (req, res) => {
   try {
     console.log('Received fabric classification request');
+    console.log('File details:', {
+      size: req.file?.size,
+      mimetype: req.file?.mimetype,
+      originalname: req.file?.originalname
+    });
     
     if (!req.file) {
       return res.status(400).json({ error: 'No image file provided' });
     }
 
     const result = await classifyFabric(req.file.buffer);
+    console.log('Classification result:', result);
     res.json(result);
   } catch (error) {
     console.error('Classification error:', error);
-    res.status(500).json({ error: 'Failed to classify fabric' });
+    console.error('Error stack:', error.stack);
+    res.status(500).json({ 
+      error: 'Failed to classify fabric',
+      details: error.message,
+      stack: error.stack
+    });
   }
 });
 
