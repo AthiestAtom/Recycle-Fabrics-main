@@ -38,6 +38,8 @@ const classifyFabric = async (imageBuffer) => {
     console.log('API Key exists:', !!GEMINI_API_KEY);
     
     // Call Google Gemini API
+    console.log('Making API call to Gemini...');
+    
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
       method: 'POST',
       headers: {
@@ -57,19 +59,37 @@ const classifyFabric = async (imageBuffer) => {
     });
     
     console.log('Gemini response status:', response.status);
-    console.log('Gemini response headers:', response.headers);
+    console.log('Gemini response headers:', Object.fromEntries(response.headers.entries()));
     
     if (!response.ok) {
       const errorText = await response.text();
       console.log('Gemini error response:', errorText);
+      console.log('Response headers on error:', Object.fromEntries(response.headers.entries()));
       throw new Error(`Gemini API error: ${response.status} - ${errorText}`);
     }
     
     const data = await response.json();
+    console.log('Gemini response data type:', typeof data);
     console.log('Gemini response data:', data);
     
+    // Handle different response formats
+    if (!data || typeof data !== 'object') {
+      console.log('Invalid Gemini response format:', data);
+      throw new Error('Invalid response format from Gemini API');
+    }
+    
+    if (!data.candidates || !Array.isArray(data.candidates) || data.candidates.length === 0) {
+      console.log('No candidates in Gemini response:', data);
+      throw new Error('No candidates returned from Gemini API');
+    }
+    
+    if (!data.candidates[0]?.content?.parts || !Array.isArray(data.candidates[0]?.content?.parts) || data.candidates[0]?.content?.parts?.length === 0) {
+      console.log('No parts in Gemini response:', data.candidates[0]?.content);
+      throw new Error('No parts returned from Gemini API');
+    }
+    
     // Return the raw text response from Gemini
-    const geminiText = data.candidates?.[0]?.content?.parts?.[0]?.text || "Unable to classify this fabric.";
+    const geminiText = data.candidates[0]?.content?.parts?.[0]?.text || "Unable to classify this fabric.";
     console.log('Gemini raw text:', geminiText);
     
     // Try to parse as JSON, fallback to text if parsing fails
@@ -78,6 +98,7 @@ const classifyFabric = async (imageBuffer) => {
       classificationData = JSON.parse(geminiText);
     } catch (parseError) {
       console.log('Failed to parse Gemini response as JSON:', parseError);
+      console.log('Response that failed to parse:', geminiText);
       classificationData = {
         fabric_type: "Unknown",
         recycling_method: "Standard recycling",
