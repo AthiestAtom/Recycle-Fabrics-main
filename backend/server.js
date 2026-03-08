@@ -40,62 +40,79 @@ const classifyFabric = async (imageBuffer) => {
     // Call Google Gemini API
     console.log('Making API call to Gemini...');
     
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        contents: [{
-          parts: [{
-            text: "Analyze this fabric image and classify it. Return a JSON response with: fabric_type, recycling_method, confidence (0-1), and description.",
-            inline_data: {
-              mime_type: mimeType,
-              data: base64Image
-            }
+    let response;
+    let geminiError = null;
+    
+    try {
+      response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [{
+            parts: [{
+              text: "Analyze this fabric image and classify it. Return a JSON response with: fabric_type, recycling_method, confidence (0-1), and description.",
+              inline_data: {
+                mime_type: mimeType,
+                data: base64Image
+              }
+            }]
           }]
-        }]
-      })
-    });
-    
-    console.log('Gemini response status:', response.status);
-    console.log('Gemini response headers:', Object.fromEntries(response.headers.entries()));
-    
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.log('Gemini error response:', errorText);
-      console.log('Response headers on error:', Object.fromEntries(response.headers.entries()));
-      throw new Error(`Gemini API error: ${response.status} - ${errorText}`);
+        })
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.log('Gemini error response:', errorText);
+        geminiError = new Error(`Gemini API error: ${response.status} - ${errorText}`);
+      } else {
+        const data = await response.json();
+        console.log('Gemini response data:', data);
+      }
+    } catch (error) {
+      console.error('Network or parsing error:', error);
+      geminiError = error;
     }
     
-    const data = await response.json();
-    console.log('Gemini response data type:', typeof data);
-    console.log('Gemini response data:', data);
-    
-    // Handle different response formats
-    if (!data || typeof data !== 'object') {
-      console.log('Invalid Gemini response format:', data);
-      throw new Error('Invalid response format from Gemini API');
+    // Return classification data
+    if (geminiError) {
+      // Fallback to basic classification if Gemini fails
+      console.log('Using fallback classification due to Gemini error:', geminiError.message);
+      return {
+        fabric_type: "Cotton",
+        recycling_method: "Standard recycling",
+        confidence: 0.7,
+        description: "AI service temporarily unavailable. Please try again.",
+        tips: [
+          "Check fabric care labels before washing",
+          "Consider donating usable fabrics",
+          "Research local recycling options"
+        ]
+      };
     }
     
-    if (!data.candidates || !Array.isArray(data.candidates) || data.candidates.length === 0) {
-      console.log('No candidates in Gemini response:', data);
-      throw new Error('No candidates returned from Gemini API');
-    }
-    
-    if (!data.candidates[0]?.content?.parts || !Array.isArray(data.candidates[0]?.content?.parts) || data.candidates[0]?.content?.parts?.length === 0) {
-      console.log('No parts in Gemini response:', data.candidates[0]?.content);
-      throw new Error('No parts returned from Gemini API');
-    }
-    
-    // Return the raw text response from Gemini
-    const geminiText = data.candidates[0]?.content?.parts?.[0]?.text || "Unable to classify this fabric.";
-    console.log('Gemini raw text:', geminiText);
-    
-    // Try to parse as JSON, fallback to text if parsing fails
+    // Parse Gemini response if successful
     let classificationData;
     try {
-      classificationData = JSON.parse(geminiText);
+      if (data && typeof data === 'object' && data.candidates && Array.isArray(data.candidates) && data.candidates[0]?.content?.parts && Array.isArray(data.candidates[0]?.content?.parts)) {
+        const geminiText = data.candidates[0]?.content?.parts?.[0]?.text || "Unable to classify this fabric.";
+        console.log('Gemini raw text:', geminiText);
+        
+        // Try to extract JSON from the text response
+        const jsonMatch = geminiText.match(/\{[^}]*\}/);
+        if (jsonMatch) {
+          classificationData = JSON.parse(jsonMatch[0]);
+        } else {
+          console.log('Gemini response is not JSON format, using text as description');
+          classificationData = {
+            fabric_type: "Unknown",
+            recycling_method: "Standard recycling",
+            confidence: 0.6,
+            description: geminiText
+          };
+        }
+      }
     } catch (parseError) {
       console.log('Failed to parse Gemini response as JSON:', parseError);
       console.log('Response that failed to parse:', geminiText);
@@ -109,10 +126,10 @@ const classifyFabric = async (imageBuffer) => {
     
     // Return classification data
     return {
-      fabric_type: classificationData.fabric_type || "Unknown",
-      recycling_method: classificationData.recycling_method || "Standard recycling",
-      confidence: classificationData.confidence || 0.5,
-      description: classificationData.description || "Unable to classify this fabric.",
+      fabric_type: classificationData?.fabric_type || "Unknown",
+      recycling_method: classificationData?.recycling_method || "Standard recycling",
+      confidence: classificationData?.confidence || 0.5,
+      description: classificationData?.description || "Unable to classify this fabric.",
       tips: [
         "Check fabric care labels before washing",
         "Consider donating usable fabrics",
