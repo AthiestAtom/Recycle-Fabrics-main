@@ -58,10 +58,10 @@ const classifyFabric = async (imageBuffer) => {
     
     // Return the classification data
     return {
-      fabric_type: data.candidates[0].content.parts[0].text || "Unknown",
-      recycling_method: data.candidates[0].content.parts[0].text || "Standard recycling",
+      fabric_type: data.candidates?.[0]?.content?.parts?.[0]?.text || "Unknown",
+      recycling_method: data.candidates?.[0]?.content?.parts?.[0]?.text || "Standard recycling",
       confidence: 0.8, // Default confidence since we can't extract it reliably
-      description: data.candidates[0].content.parts[0].text || "Unable to classify this fabric.",
+      description: data.candidates?.[0]?.content?.parts?.[0]?.text || "Unable to classify this fabric.",
       tips: [
         "Check fabric care labels before washing",
         "Consider donating usable fabrics",
