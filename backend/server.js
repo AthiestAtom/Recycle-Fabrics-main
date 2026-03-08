@@ -143,11 +143,21 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Test endpoint for debugging
+app.get('/api/test', (req, res) => {
+  res.json({ 
+    message: 'Backend test endpoint working!',
+    timestamp: new Date().toISOString(),
+    api_key_configured: !!GEMINI_API_KEY
+  });
+});
+
 // Start server
 app.listen(PORT, () => {
   console.log(`🚀 Backend server running on port ${PORT}`);
   console.log(`📊 Health check: http://localhost:${PORT}/api/health`);
   console.log(`🔍 Fabric classification: http://localhost:${PORT}/api/classify-fabric`);
+  console.log(`🧪 Test endpoint: http://localhost:${PORT}/api/test`);
 });
 
 // Handle graceful shutdown
