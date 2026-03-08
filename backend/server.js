@@ -34,7 +34,13 @@ const classifyFabric = async (imageBuffer) => {
       fabric_type: "Cotton",
       recycling_method: "Composting",
       confidence: 0.85,
-      description: "This is a cotton fabric that can be composted or recycled into new textiles."
+      description: "This is a cotton fabric that can be composted or recycled into new textiles.",
+      tips: [
+        "Cut into small pieces before composting",
+        "Remove any non-biodegradable attachments",
+        "Mix with other organic materials for better composting",
+        "Use in home compost bin or municipal facility"
+      ]
     };
     
     // TODO: Add actual Gemini API call later
