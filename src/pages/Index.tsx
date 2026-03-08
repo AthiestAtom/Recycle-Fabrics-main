@@ -326,17 +326,25 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
         ? 'http://localhost:3001/api/classify-fabric'
         : 'https://fabric-classifier-api.onrender.com/api/classify-fabric';
       
+      console.log('Sending request to:', apiUrl);
+      console.log('Selected file:', selectedFile);
+      
       const response = await fetch(apiUrl, {
         method: 'POST',
         body: formData,
       });
 
+      console.log('Response status:', response.status);
+      console.log('Response headers:', response.headers);
+      
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to classify fabric');
+        const errorText = await response.text();
+        console.log('Error response text:', errorText);
+        throw new Error(`Server error: ${response.status}`);
       }
 
       const data = await response.json();
+      console.log('Success data:', data);
       setResult(data);
     } catch (err: any) {
       console.error("Classification error:", err);
