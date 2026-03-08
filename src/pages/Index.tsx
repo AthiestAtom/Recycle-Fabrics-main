@@ -321,7 +321,10 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
       formData.append('image', selectedFile);
 
       // Call backend API
-      const apiUrl = 'https://fabric-classifier-api.onrender.com/api/classify-fabric';
+      const isDevelopment = import.meta.env.DEV;
+      const apiUrl = isDevelopment 
+        ? 'http://localhost:3001/api/classify-fabric'
+        : 'https://fabric-classifier-api.onrender.com/api/classify-fabric';
       
       const response = await fetch(apiUrl, {
         method: 'POST',
