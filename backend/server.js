@@ -54,34 +54,20 @@ const classifyFabric = async (imageBuffer) => {
     
     const data = await response.json();
     
-    // Parse the response to extract the classification data
-    const text = data.candidates[0].content.parts[0].text;
-    const classificationData = JSON.parse(text);
-    
-    console.log('Gemini API response:', classificationData);
+    console.log('Gemini API response:', data);
     
     // Return the classification data
     return {
-      fabric_type: classificationData.fabric_type || "Unknown",
-      recycling_method: classificationData.recycling_method || "Standard recycling",
-      confidence: classificationData.confidence || 0.5,
-      description: classificationData.description || "Unable to classify this fabric.",
+      fabric_type: data.candidates[0].content.parts[0].text || "Unknown",
+      recycling_method: data.candidates[0].content.parts[0].text || "Standard recycling",
+      confidence: 0.8, // Default confidence since we can't extract it reliably
+      description: data.candidates[0].content.parts[0].text || "Unable to classify this fabric.",
       tips: [
         "Check fabric care labels before washing",
         "Consider donating usable fabrics",
         "Research local recycling options"
       ]
     };
-    
-    // TODO: Remove this mock response section
-    /*
-    // For now, return a mock response to test the backend
-    return {
-      fabric_type: "Cotton",
-      recycling_method: "Composting",
-      confidence: 0.85,
-      description: "This is a cotton fabric that can be composted or recycled into new textiles.",
-      tips: [
         "Cut into small pieces before composting",
         "Remove any non-biodegradable attachments",
         "Mix with other organic materials for better composting",
