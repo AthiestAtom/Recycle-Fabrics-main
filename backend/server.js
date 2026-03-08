@@ -4,8 +4,13 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
-// Load environment variables (for production deployment)
-require('dotenv').config();
+// Load environment variables first
+try {
+  require('dotenv').config();
+} catch (error) {
+  console.log('Error loading .env:', error);
+  // Continue without environment variables
+}
 
 const app = express();
 const PORT = process.env.BACKEND_PORT || 3001;
