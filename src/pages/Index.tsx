@@ -321,9 +321,10 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
       formData.append('image', selectedFile);
 
       // Call backend API
-      const apiUrl = import.meta.env.PROD 
-        ? 'https://your-backend-domain.com/api/classify-fabric' // Replace with your deployed backend URL
-        : 'http://localhost:3001/api/classify-fabric';
+      const isDevelopment = import.meta.env.DEV;
+      const apiUrl = isDevelopment 
+        ? 'http://localhost:3001/api/classify-fabric'
+        : `https://${import.meta.env.VITE_API_URL || 'athiestatom.github.io/Recycle-Fabrics-main'}/api/classify-fabric`;
       
       const response = await fetch(apiUrl, {
         method: 'POST',

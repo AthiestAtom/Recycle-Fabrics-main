@@ -4,11 +4,18 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
-// Load environment variables first
+// Load environment variables (for production deployment)
 require('dotenv').config();
 
 const app = express();
 const PORT = process.env.BACKEND_PORT || 3001;
+
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+
+if (!GEMINI_API_KEY) {
+  console.error('GEMINI_API_KEY not configured in environment variables');
+  process.exit(1);
+}
 
 // Middleware
 app.use(cors());
