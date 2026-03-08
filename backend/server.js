@@ -3,6 +3,8 @@ const cors = require('cors');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+
+// Load environment variables first
 require('dotenv').config();
 
 const app = express();
