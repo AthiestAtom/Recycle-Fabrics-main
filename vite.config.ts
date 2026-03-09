@@ -33,36 +33,23 @@ export default defineConfig(({ mode }: { mode: string }) => ({
     sourcemap: true,
     rollupOptions: {
       output: {
-        manualChunks: (id) => {
-          // Split vendor libraries
-          if (id.includes('node_modules')) {
-            if (id.includes('react') && id.includes('react-dom')) {
-              return 'vendor';
-            }
-            if (id.includes('react-router-dom')) {
-              return 'router';
-            }
-            if (id.includes('@tanstack/react-query')) {
-              return 'query';
-            }
-            if (id.includes('@supabase')) {
-              return 'supabase';
-            }
-            if (id.includes('@radix-ui')) {
-              return 'ui';
-            }
-            if (id.includes('lucide-react')) {
-              return 'icons';
-            }
-            return 'vendor';
-          }
-          // Split app modules
-          if (id.includes('pages')) {
-            return 'pages';
-          }
-          if (id.includes('components')) {
-            return 'components';
-          }
+        manualChunks: {
+          // Split vendor from app code
+          vendor: ['react', 'react-dom'],
+          router: ['react-router-dom'],
+          ui: [
+            '@radix-ui/react-dialog',
+            '@radix-ui/react-label',
+            '@radix-ui/react-progress',
+            '@radix-ui/react-separator',
+            '@radix-ui/react-slot',
+            '@radix-ui/react-toast',
+            '@radix-ui/react-toggle',
+            '@radix-ui/react-tooltip'
+          ],
+          icons: ['lucide-react'],
+          query: ['@tanstack/react-query'],
+          supabase: ['@supabase/supabase-js']
         },
       },
     },
