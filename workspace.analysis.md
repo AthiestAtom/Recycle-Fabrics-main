@@ -11,7 +11,9 @@
 #### **Core Application Files (Active)**
 - **Frontend**: 55 files in `/src`
   - 8 main components (ImageUploader, ClassificationResult, etc.)
-  - 40+ UI components from shadcn/ui
+  - **Actually Used UI Components**: 16 components
+    - **Directly Used**: button.tsx, card.tsx, badge.tsx, progress.tsx, toast.tsx, toaster.tsx, sonner.tsx, tooltip.tsx, label.tsx
+    - **Used by Other UI Components**: input.tsx, separator.tsx, sheet.tsx, skeleton.tsx, toggle.tsx
   - 3 pages (Index, NotFound)
   - Utility files and hooks
 
