@@ -320,18 +320,28 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
       const formData = new FormData();
       formData.append('image', selectedFile);
 
-      // Call local backend API
-      const response = await fetch('http://localhost:3001/api/classify-fabric', {
+      // Call backend API
+      const apiUrl = 'https://fabric-classifier-api.onrender.com/api/classify-fabric';
+      
+      console.log('Sending request to:', apiUrl);
+      console.log('Selected file:', selectedFile);
+      
+      const response = await fetch(apiUrl, {
         method: 'POST',
         body: formData,
       });
 
+      console.log('Response status:', response.status);
+      console.log('Response headers:', response.headers);
+      
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to classify fabric');
+        const errorText = await response.text();
+        console.log('Error response text:', errorText);
+        throw new Error(`Server error: ${response.status}`);
       }
 
       const data = await response.json();
+      console.log('Success data:', data);
       setResult(data);
     } catch (err: any) {
       console.error("Classification error:", err);
@@ -404,13 +414,22 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
               </div>
             </div>
 
-            <a
-              href="#classify"
-              className="inline-flex items-center gap-4 mt-20 px-12 py-6 bg-gradient-to-r from-emerald-400 to-teal-400 text-white font-bold rounded-3xl shadow-2xl hover:shadow-3xl transform hover:-translate-y-2 transition-all duration-300 text-xl hover:from-emerald-300 hover:to-teal-300"
-            >
-              Try it now
-              <ArrowDown className="w-6 h-6 animate-bounce" />
-            </a>
+            <div className="flex justify-center">
+              <Button 
+                onClick={() => {
+                  const classifySection = document.getElementById('classify');
+                  if (classifySection) {
+                    classifySection.scrollIntoView({ behavior: 'smooth' });
+                  } else {
+                    window.scrollTo({ top: 1000, behavior: 'smooth' });
+                  }
+                }}
+                className="inline-flex items-center gap-4 mt-20 px-12 py-6 bg-gradient-to-r from-emerald-400 to-teal-400 text-white font-bold rounded-3xl shadow-2xl hover:shadow-3xl transform hover:-translate-y-2 transition-all duration-300 text-xl hover:from-emerald-300 hover:to-teal-300"
+              >
+                Try it now
+                <ArrowDown className="w-6 h-6 animate-bounce" />
+              </Button>
+            </div>
           </div>
         </div>
       </section>

@@ -2,110 +2,55 @@ import React, { useState, useEffect, useRef } from 'react';
 
 const VideoBackground = () => {
   const [isLoaded, setIsLoaded] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    const handleCanPlay = () => {
+    // YouTube iframe loads pretty quickly
+    const timer = setTimeout(() => {
       setIsLoaded(true);
-      setIsPlaying(true);
-      setError(null);
-    };
-
-    const handleError = () => {
-      setError('Video failed to load');
-      setIsPlaying(false);
-    };
-
-    const handleLoadStart = () => {
-      setIsLoaded(false);
-    };
-
-    video.addEventListener('canplay', handleCanPlay);
-    video.addEventListener('error', handleError);
-    video.addEventListener('loadstart', handleLoadStart);
-
-    // Set video properties for optimization
-    video.playbackRate = 8.0; // 8x speed for fast-paced action
-    video.volume = 0; // Muted for background
-
-    return () => {
-      video.removeEventListener('canplay', handleCanPlay);
-      video.removeEventListener('error', handleError);
-      video.removeEventListener('loadstart', handleLoadStart);
-    };
+    }, 2000);
+    
+    return () => clearTimeout(timer);
   }, []);
-
-  const togglePlayPause = () => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    if (isPlaying) {
-      video.pause();
-      setIsPlaying(false);
-    } else {
-      video.play().catch(err => {
-        setError('Failed to play video');
-      });
-      setIsPlaying(true);
-    }
-  };
-
-  if (error) {
-    return (
-      <div className="fixed inset-0 -z-50 bg-gradient-to-br from-emerald-600 via-teal-500 to-cyan-400">
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-white text-center">
-            <div className="text-4xl mb-4">🎮</div>
-            <p className="text-xl">Video unavailable</p>
-            <p className="text-sm opacity-75">Using gradient background</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="fixed inset-0 -z-50">
-      {/* Video Background - Full Screen */}
-      <video
-        ref={videoRef}
-        autoPlay
-        loop
-        muted
-        playsInline
-        className="fixed inset-0 w-full h-full object-cover"
+      {/* YouTube Video Background */}
+      <iframe
+        ref={iframeRef}
+        src="https://www.youtube.com/embed/PvPIdcxH4hY?autoplay=1&mute=1&loop=1&playlist=PvPIdcxH4hY&controls=0&showinfo=0&modestbranding=1&rel=0&iv_load_policy=3&disablekb=1"
         style={{
+          position: 'fixed',
+          top: '50%',
+          left: '50%',
+          width: '100vw',
+          height: '56.25vw', // 16:9 aspect ratio
+          minWidth: '177.77vh',
+          minHeight: '100vh',
+          transform: 'translate(-50%, -50%) scale(1.1)',
           filter: 'blur(1px) brightness(0.7)',
-          transform: 'scale(1.05)',
           opacity: isLoaded ? 0.8 : 0,
           transition: 'opacity 2s ease-in-out',
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100vw',
-          height: '100vh',
+          pointerEvents: 'none',
           zIndex: -1
         }}
-      >
-        <source src="/videoplayback.mp4" type="video/mp4" />
-        Your browser does not support the video tag.
-      </video>
+        frameBorder="0"
+        allow="autoplay; encrypted-media; gyroscope; picture-in-picture"
+        allowFullScreen
+      />
 
-      {/* Minimal overlay for better text readability */}
+      {/* Gradient background - Always present as safety net */}
       <div 
-        className="fixed inset-0 bg-gradient-to-br from-emerald-900/10 via-teal-800/10 to-cyan-900/10"
+        className="fixed inset-0 bg-gradient-to-br from-emerald-600 via-teal-500 to-cyan-400"
         style={{
           position: 'fixed',
           top: 0,
           left: 0,
           width: '100vw',
           height: '100vh',
-          zIndex: -1
+          zIndex: -2,
+          opacity: isLoaded ? 0 : 1,
+          transition: 'opacity 2s ease-in-out'
         }}
       />
       
@@ -124,13 +69,13 @@ const VideoBackground = () => {
         }}
       />
 
-      {/* Loading indicator */}
+      {/* Loading indicator for YouTube video */}
       {!isLoaded && (
-        <div className="fixed inset-0 flex items-center justify-center bg-gradient-to-br from-emerald-600 via-teal-500 to-cyan-400">
+        <div className="fixed inset-0 flex items-center justify-center bg-gradient-to-br from-emerald-600 via-teal-500 to-cyan-400" style={{ zIndex: 30 }}>
           <div className="text-white text-center">
             <div className="text-6xl mb-4 animate-bounce">🎮</div>
-            <p className="text-xl font-bold">Loading Pokemon Emerald...</p>
-            <p className="text-sm opacity-75">Please wait</p>
+            <p className="text-xl font-bold">Loading YouTube Video...</p>
+            <p className="text-sm opacity-75">Your epic background is starting...</p>
             <div className="mt-4 flex justify-center gap-2">
               <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
               <div className="w-2 h-2 bg-white rounded-full animate-pulse delay-1000"></div>
@@ -140,29 +85,18 @@ const VideoBackground = () => {
         </div>
       )}
 
-      {/* Video Controls */}
-      <div className="fixed bottom-4 right-4 z-50">
-        <button
-          onClick={togglePlayPause}
-          className="bg-black/50 backdrop-blur-sm text-white px-4 py-2 rounded-lg border border-white/20 hover:bg-black/70 transition-colors duration-200 flex items-center gap-2"
-        >
-          {isPlaying ? '⏸️' : '▶️'}
-          <span className="text-sm">{isPlaying ? 'Pause' : 'Play'}</span>
-        </button>
-      </div>
-
       {/* Pokemon Emerald Style UI Elements */}
-      <div className="fixed top-4 left-4 bg-emerald-800/80 backdrop-blur-sm px-4 py-2 rounded-lg border-2 border-emerald-400 shadow-lg z-40">
+      <div className="fixed top-4 left-4 bg-emerald-800/80 backdrop-blur-sm px-4 py-2 rounded-lg border-2 border-emerald-400 shadow-lg z-40" style={{ zIndex: 50 }}>
         <div className="text-white font-bold text-sm">POKÉMON EMERALD</div>
         <div className="text-emerald-200 text-xs">TEXTILE RECYCLING EDITION</div>
       </div>
       
-      <div className="fixed top-4 right-4 bg-emerald-800/80 backdrop-blur-sm px-4 py-2 rounded-lg border-2 border-emerald-400 shadow-lg z-40">
+      <div className="fixed top-4 right-4 bg-emerald-800/80 backdrop-blur-sm px-4 py-2 rounded-lg border-2 border-emerald-400 shadow-lg z-40" style={{ zIndex: 50 }}>
         <div className="text-white font-bold text-sm">CHANDIGARH REGION</div>
         <div className="text-emerald-200 text-xs">SECTORS: 1-56</div>
       </div>
       
-      <div className="fixed bottom-4 left-4 bg-emerald-800/80 backdrop-blur-sm px-4 py-2 rounded-lg border-2 border-emerald-400 shadow-lg z-40">
+      <div className="fixed bottom-4 left-4 bg-emerald-800/80 backdrop-blur-sm px-4 py-2 rounded-lg border-2 border-emerald-400 shadow-lg z-40" style={{ zIndex: 50 }}>
         <div className="text-white font-bold text-sm">⏱️ TIME: {new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</div>
         <div className="text-emerald-200 text-xs">📍 SECTOR 17</div>
       </div>

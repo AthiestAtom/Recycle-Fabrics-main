@@ -40,6 +40,8 @@ const ImageUploader = ({ onImageSelect, selectedImage, onClear, isAnalyzing }: I
         {!isAnalyzing && (
           <button
             onClick={onClear}
+            type="button"
+            aria-label="Clear selected image"
             className="absolute top-4 right-4 p-3 rounded-full bg-white/90 backdrop-blur-sm text-gray-700 hover:bg-white hover:shadow-lg transition-all duration-300 border border-gray-200"
           >
             <X className="w-5 h-5" />
@@ -72,6 +74,8 @@ const ImageUploader = ({ onImageSelect, selectedImage, onClear, isAnalyzing }: I
         onChange={handleInputChange}
         className="absolute inset-0 opacity-0 cursor-pointer"
         id="fabric-upload"
+        aria-label="Upload fabric image for classification"
+        name="fabric-image"
       />
       <div className="flex flex-col items-center gap-6">
         <div className={`w-20 h-20 rounded-full flex items-center justify-center transition-all duration-300 ${
@@ -79,9 +83,12 @@ const ImageUploader = ({ onImageSelect, selectedImage, onClear, isAnalyzing }: I
             ? "bg-gradient-to-r from-emerald-500 to-blue-500 shadow-lg scale-110" 
             : "bg-gradient-to-r from-emerald-100 to-blue-100"
         }`}>
-          <Upload className={`w-10 h-10 transition-colors duration-300 ${
-            isDragging ? "text-white" : "text-emerald-600"
-          }`} />
+          <Upload 
+            aria-label="Upload fabric image"
+            className={`w-10 h-10 transition-colors duration-300 ${
+              isDragging ? "text-white" : "text-emerald-600"
+            }`} 
+          />
         </div>
         <div>
           <p className="font-display text-2xl font-bold text-gray-800 mb-2">
