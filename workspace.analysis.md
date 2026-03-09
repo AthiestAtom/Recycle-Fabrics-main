@@ -9,13 +9,18 @@
 ### **File Categories**
 
 #### **Core Application Files (Active)**
-- **Frontend**: 20 files in `/src` - *Reduced by 35 files*
-  - 6 main components (ImageUploader, ClassificationResult, etc.) - *Removed 2 Pokemon components*
-  - **Actually Used UI Components**: 16 components - *All unused UI components removed*
-    - **Directly Used**: button.tsx, card.tsx, badge.tsx, progress.tsx, toast.tsx, toaster.tsx, sonner.tsx, tooltip.tsx, label.tsx
-    - **Used by Other UI Components**: input.tsx, separator.tsx, sheet.tsx, skeleton.tsx, toggle.tsx
-  - 3 pages (Index, NotFound)
-  - Utility files and hooks
+- **Frontend**: 20 files in `/src` - *Optimized directory structure*
+  - **Organized Components**:
+    - `features/` - Core functionality (ImageUploader, ClassificationResult, AnalyzingState)
+    - `common/` - Shared components (VideoBackground, AnimatedBackground, NavLink)
+    - `ui/` - UI library components (16 components)
+  - **Core Files**: `core/` - App.tsx, main.tsx
+  - **Pages**: `pages/` - Index.tsx, NotFound.tsx
+  - **Services**: `services/` - Supabase integration
+  - **Utils**: `utils/lib/` - Helper functions
+  - **Styles**: `styles/` - CSS files
+  - **Types**: `types/` - TypeScript definitions
+  - **Hooks**: `hooks/` - Custom React hooks
 
 #### **Backend Files**
 - **5 files** in `/backend` (excluding node_modules)
