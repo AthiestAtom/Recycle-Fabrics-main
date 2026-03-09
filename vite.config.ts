@@ -31,15 +31,5 @@ export default defineConfig(({ mode }: { mode: string }) => ({
     outDir: 'dist',
     assetsDir: 'assets',
     sourcemap: true,
-    rollupOptions: {
-      output: {
-        manualChunks(id) {
-          // Create vendor chunk for node_modules
-          if (id.includes('node_modules')) {
-            return 'vendor';
-          }
-        },
-      },
-    },
   },
 }));
