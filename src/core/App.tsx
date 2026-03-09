@@ -3,11 +3,8 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { HashRouter, Routes, Route } from "react-router-dom";
-import { Suspense, lazy } from "react";
-
-// Lazy load pages for code splitting
-const Index = lazy(() => import("../pages/Index"));
-const NotFound = lazy(() => import("../pages/NotFound"));
+import Index from "../pages/Index";
+import NotFound from "../pages/NotFound";
 
 const queryClient = new QueryClient();
 
@@ -18,23 +15,9 @@ const App = () => (
       <Sonner />
       <HashRouter>
         <Routes>
-          <Route 
-            path="/" 
-            element={
-              <Suspense fallback={<div>Loading...</div>}>
-                <Index />
-              </Suspense>
-            } 
-          />
+          <Route path="/" element={<Index />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route 
-            path="*" 
-            element={
-              <Suspense fallback={<div>Loading...</div>}>
-                <NotFound />
-              </Suspense>
-            } 
-          />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </HashRouter>
     </TooltipProvider>

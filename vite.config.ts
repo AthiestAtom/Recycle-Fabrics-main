@@ -1,7 +1,6 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import { resolve } from "path";
-import { visualizer } from "rollup-plugin-visualizer";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }: { mode: string }) => ({
@@ -12,15 +11,7 @@ export default defineConfig(({ mode }: { mode: string }) => ({
       overlay: false,
     },
   },
-  plugins: [
-    react(),
-    mode === 'analyze' ? visualizer({ 
-      filename: 'dist/stats.html',
-      open: true,
-      gzipSize: true,
-      brotliSize: true,
-    }) : null
-  ].filter(Boolean),
+  plugins: [react()],
   resolve: {
     alias: {
       "@": resolve(__dirname, "./src"),
@@ -31,5 +22,10 @@ export default defineConfig(({ mode }: { mode: string }) => ({
     outDir: 'dist',
     assetsDir: 'assets',
     sourcemap: true,
+    rollupOptions: {
+      output: {
+        manualChunks: undefined,
+      },
+    },
   },
 }));
