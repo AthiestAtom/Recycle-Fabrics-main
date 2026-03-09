@@ -22,16 +22,5 @@ export default defineConfig(({ mode }: { mode: string }) => ({
     outDir: 'dist',
     assetsDir: 'assets',
     sourcemap: true,
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          // Only split large vendor libraries
-          vendor: ['react', 'react-dom'],
-          router: ['react-router-dom'],
-          ui: ['@radix-ui/react-dialog', '@radix-ui/react-toast', '@radix-ui/react-tooltip'],
-          icons: ['lucide-react']
-        }
-      }
-    }
   },
 }));
