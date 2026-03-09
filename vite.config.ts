@@ -33,23 +33,11 @@ export default defineConfig(({ mode }: { mode: string }) => ({
     sourcemap: true,
     rollupOptions: {
       output: {
-        manualChunks: {
-          // Split vendor from app code
-          vendor: ['react', 'react-dom'],
-          router: ['react-router-dom'],
-          ui: [
-            '@radix-ui/react-dialog',
-            '@radix-ui/react-label',
-            '@radix-ui/react-progress',
-            '@radix-ui/react-separator',
-            '@radix-ui/react-slot',
-            '@radix-ui/react-toast',
-            '@radix-ui/react-toggle',
-            '@radix-ui/react-tooltip'
-          ],
-          icons: ['lucide-react'],
-          query: ['@tanstack/react-query'],
-          supabase: ['@supabase/supabase-js']
+        manualChunks(id) {
+          // Create vendor chunk for node_modules
+          if (id.includes('node_modules')) {
+            return 'vendor';
+          }
         },
       },
     },
