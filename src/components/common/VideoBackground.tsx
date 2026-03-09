@@ -2,23 +2,36 @@ import React, { useState, useEffect, useRef } from 'react';
 
 const VideoBackground = () => {
   const [isLoaded, setIsLoaded] = useState(false);
+  const [videoStarted, setVideoStarted] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => {
     // YouTube iframe loads pretty quickly
     const timer = setTimeout(() => {
       setIsLoaded(true);
+      // Try to start video after load
+      if (iframeRef.current) {
+        iframeRef.current.src += "&autoplay=1";
+      }
     }, 2000);
     
     return () => clearTimeout(timer);
   }, []);
+
+  const handleVideoClick = () => {
+    setVideoStarted(true);
+    if (iframeRef.current) {
+      // Force restart with autoplay
+      iframeRef.current.src = iframeRef.current.src.replace(/autoplay=0/, 'autoplay=1');
+    }
+  };
 
   return (
     <div className="fixed inset-0 -z-50">
       {/* YouTube Video Background */}
       <iframe
         ref={iframeRef}
-        src="https://www.youtube.com/embed/PvPIdcxH4hY?autoplay=1&mute=1&loop=1&playlist=PvPIdcxH4hY&controls=0&showinfo=0&modestbranding=1&rel=0&iv_load_policy=3&disablekb=1"
+        src="https://www.youtube.com/embed/PvPIdcxH4hY?autoplay=1&mute=1&loop=1&playlist=PvPIdcxH4hY&controls=0&showinfo=0&modestbranding=1&rel=0&iv_load_policy=3&disablekb=1&enablejsapi=1"
         style={{
           position: 'fixed',
           top: '50%',
@@ -31,12 +44,14 @@ const VideoBackground = () => {
           filter: 'blur(1px) brightness(0.7)',
           opacity: isLoaded ? 0.8 : 0,
           transition: 'opacity 2s ease-in-out',
-          pointerEvents: 'none',
+          pointerEvents: videoStarted ? 'none' : 'auto',
           zIndex: -1
         }}
         frameBorder="0"
         allow="autoplay; encrypted-media; gyroscope; picture-in-picture"
         allowFullScreen
+        onClick={handleVideoClick}
+        title="Background Video"
       />
 
       {/* Gradient background - Always present as safety net */}
@@ -81,6 +96,15 @@ const VideoBackground = () => {
               <div className="w-2 h-2 bg-white rounded-full animate-pulse delay-1000"></div>
               <div className="w-2 h-2 bg-white rounded-full animate-pulse delay-2000"></div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* User interaction prompt for autoplay */}
+      {isLoaded && !videoStarted && (
+        <div className="fixed inset-0 flex items-center justify-center pointer-events-none" style={{ zIndex: 25 }}>
+          <div className="text-white text-center bg-black/50 backdrop-blur-sm px-6 py-4 rounded-lg">
+            <p className="text-sm opacity-75">📹 Click anywhere to start background video</p>
           </div>
         </div>
       )}
