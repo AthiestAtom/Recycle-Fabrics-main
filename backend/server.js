@@ -118,14 +118,6 @@ app.get('/api/test', (req, res) => {
   });
 });
 
-// Serve static files for frontend
-app.use(express.static(path.join(__dirname, '../dist')));
-
-// Catch-all handler for SPA
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../dist/index.html'));
-});
-
 // Start server
 app.listen(PORT, () => {
   console.log(`🚀 Backend server running on port ${PORT}`);
