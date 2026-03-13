@@ -27,9 +27,9 @@ const VideoBackground = () => {
           height: '56.25vw', // 16:9 aspect ratio
           minWidth: '177.77vh',
           minHeight: '100vh',
-          transform: 'translate(-50%, -50%) scale(1.1)',
-          filter: 'blur(1px) brightness(0.7)',
-          opacity: isLoaded ? 0.8 : 0,
+          transform: 'translate(-50%, -50%)',
+          filter: 'none',
+          opacity: isLoaded ? 1 : 0,
           transition: 'opacity 2s ease-in-out',
           pointerEvents: 'none',
           zIndex: -1
@@ -54,20 +54,7 @@ const VideoBackground = () => {
         }}
       />
       
-      {/* Scanlines effect for retro gaming feel */}
-      <div 
-        className="fixed inset-0 opacity-8"
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100vw',
-          height: '100vh',
-          zIndex: -1,
-          backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.1) 2px, rgba(255,255,255,0.1) 4px)',
-          animation: 'scanlines 8s linear infinite'
-        }}
-      />
+      {/* Removed scanlines for clean video background */}
 
       {/* Loading indicator for YouTube video */}
       {!isLoaded && (
@@ -102,11 +89,6 @@ const VideoBackground = () => {
       </div>
 
       <style>{`
-        @keyframes scanlines {
-          0% { transform: translateY(0); }
-          100% { transform: translateY(10px); }
-        }
-        
         .delay-1000 { animation-delay: 1s; }
         .delay-2000 { animation-delay: 2s; }
       `}</style>
