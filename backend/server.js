@@ -5,7 +5,7 @@ const path = require('path');
 const fs = require('fs');
 
 // Simple environment variable loading
-const GEMINI_API_KEY = process.env.RECYCLE_FABRIC || 'AIzaSyBpPDgjbxTZ-N_As3dcZJ-yitxkyAQQGyA';
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || 'AIzaSyBpPDgjbxTZ-N_As3dcZJ-yitxkyAQQGyA';
 
 console.log('Starting backend server...');
 console.log('Node.js version:', process.version);
