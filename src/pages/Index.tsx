@@ -12,7 +12,6 @@ const Index = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<FabricResult | null>(null);
-  const [modelLoading, setModelLoading] = useState(true); // Add model loading state
   
   // Blog content state
   const [selectedBlogPost, setSelectedBlogPost] = useState<string | null>(null);
@@ -313,15 +312,9 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
   const handleAnalyze = async () => {
     console.log('Analyze button clicked');
     console.log('Selected image:', selectedImage);
-    console.log('Model loading state:', modelLoading);
     
     if (!selectedImage) {
       toast.error('Please select an image first');
-      return;
-    }
-    
-    if (modelLoading) {
-      toast.info('AI model is still loading, please wait...');
       return;
     }
     
@@ -345,7 +338,6 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
       });
 
       console.log('Response status:', response.status);
-      console.log('Response headers:', response.headers);
       
       if (!response.ok) {
         const errorText = await response.text();
@@ -355,7 +347,21 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
       const data = await response.json();
       console.log('Success data:', data);
-      setResult(data);
+      
+      // Convert backend response to frontend format
+      const frontendResult = {
+        material: data.result.fabric_type,
+        confidence: data.result.confidence * 100, // Convert to percentage
+        recyclable: true,
+        biodegradable: data.result.fabric_type === 'cotton' || data.result.fabric_type === 'wool' || data.result.fabric_type === 'silk',
+        guidance: data.result.recycling_method,
+        tips: data.result.tips,
+        environmental_impact: 'Low to moderate impact'
+      };
+      
+      setResult(frontendResult);
+      toast.success('Fabric classified successfully!');
+      
     } catch (err: any) {
       console.error("Classification error:", err);
       toast.error(err.message || "Failed to classify fabric. Please try again.");
@@ -923,27 +929,16 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
                 selectedImage={selectedImage}
                 onClear={handleClear}
                 isAnalyzing={isAnalyzing}
-                modelLoading={modelLoading}
               />
 
               {selectedImage && !isAnalyzing && !result && (
                 <Button
                   onClick={handleAnalyze}
                   size="lg"
-                  disabled={modelLoading}
                   className="w-full font-display font-semibold text-lg gap-3 py-6 bg-gradient-to-r from-emerald-500 to-blue-500 hover:from-emerald-600 hover:to-blue-600 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300 rounded-2xl"
                 >
-                  {modelLoading ? (
-                    <>
-                      <div className="w-6 h-6 border-4 border-blue-200 rounded-full animate-spin" />
-                      Analyzing...
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="w-6 h-6" />
-                      Identify Material
-                    </>
-                  )}
+                  <Sparkles className="w-6 h-6" />
+                  Identify Material
                 </Button>
               )}
 
