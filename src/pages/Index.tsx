@@ -1,10 +1,10 @@
 import { useState, useCallback } from "react";
 import { toast } from "sonner";
 import { Recycle, Camera, Globe, ArrowDown, Leaf, Sparkles, Calendar, MapPin, DollarSign, Clock } from "lucide-react";
-import ImageUploader from "@/components/ImageUploader";
-import ClassificationResult, { type FabricResult } from "@/components/ClassificationResult";
-import AnalyzingState from "@/components/AnalyzingState";
-import VideoBackground from "@/components/VideoBackground";
+import ImageUploader from "@/components/features/ImageUploader";
+import ClassificationResult, { type FabricResult } from "@/components/features/ClassificationResult";
+import AnalyzingState from "@/components/features/AnalyzingState";
+import VideoBackground from "@/components/common/VideoBackground";
 import { Button } from "@/components/ui/button";
 
 const Index = () => {
