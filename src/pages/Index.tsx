@@ -347,21 +347,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
       const data = await response.json();
       console.log('Success data:', data);
-      
-      // Convert backend response to frontend format
-      const frontendResult = {
-        material: data.result.fabric_type,
-        confidence: data.result.confidence * 100, // Convert to percentage
-        recyclable: true,
-        biodegradable: data.result.fabric_type === 'cotton' || data.result.fabric_type === 'wool' || data.result.fabric_type === 'silk',
-        guidance: data.result.recycling_method,
-        tips: data.result.tips,
-        environmental_impact: 'Low to moderate impact'
-      };
-      
-      setResult(frontendResult);
-      toast.success('Fabric classified successfully!');
-      
+      setResult(data);
     } catch (err: any) {
       console.error("Classification error:", err);
       toast.error(err.message || "Failed to classify fabric. Please try again.");
