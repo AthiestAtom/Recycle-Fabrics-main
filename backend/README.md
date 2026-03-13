@@ -23,9 +23,9 @@ git push origin main
    - **Instance Type**: Free
 
 ### 3. Add Environment Variables
-In Render dashboard, add this environment variable:
+In Render dashboard, add this environment variable as a secret:
 - **Key**: `GEMINI_API_KEY`
-- **Value**: `AIzaSyBpPDgjbxTZ-N_As3dcZJ-yitxkyAQQGyA`
+- **Value**: Add your Google Gemini API key here (get one from https://aistudio.google.com/app/apikey)
 
 ### 4. Get Your API URL
 After deployment, your API will be available at:

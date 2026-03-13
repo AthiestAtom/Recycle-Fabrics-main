@@ -175,15 +175,14 @@ app.post('/api/classify-fabric', upload.single('image'), async (req, res) => {
 // Test endpoint for debugging
 app.get('/api/test', (req, res) => {
   console.log('=== API Key Test ===');
-  console.log('Environment variable RECYCLE_FABRIC:', process.env.RECYCLE_FABRIC);
   console.log('Environment variable GEMINI_API_KEY:', process.env.GEMINI_API_KEY);
   console.log('All environment variables:', Object.keys(process.env).filter(key => key.includes('GEMINI')));
   
   res.json({ 
     message: 'Backend test endpoint working!',
     timestamp: new Date().toISOString(),
-    api_key_configured: !!process.env.RECYCLE_FABRIC,
-    api_key_value: process.env.RECYCLE_FABRIC ? `${process.env.RECYCLE_FABRIC.substring(0, 10)}...` : 'NOT_SET',
+    api_key_configured: !!process.env.GEMINI_API_KEY,
+    api_key_value: process.env.GEMINI_API_KEY ? `${process.env.GEMINI_API_KEY.substring(0, 10)}...` : 'NOT_SET',
     env_vars_count: Object.keys(process.env).filter(key => key.includes('GEMINI')).length
   });
 });
