@@ -38,28 +38,32 @@ const classifyFabric = async (imageBuffer) => {
     const confidence = 0.75 + (Math.random() * 0.20);
     
     return {
-      fabric_type: fabricType,
-      recycling_method: recyclingMethods[fabricType],
+      material: fabricType,
       confidence: Math.min(confidence, 0.98),
-      description: `${fabricType.charAt(0).toUpperCase() + fabricType.slice(1)} is a ${fabricType === 'cotton' || fabricType === 'wool' || fabricType === 'silk' || fabricType === 'linen' ? 'natural' : 'synthetic'} fiber that can be effectively recycled through various methods.`,
+      recyclable: true,
+      biodegradable: fabricType === 'cotton' || fabricType === 'wool' || fabricType === 'silk' || fabricType === 'linen',
+      guidance: recyclingMethods[fabricType],
       tips: [
         "Check fabric care labels before washing",
         "Consider donating usable fabrics",
         "Research local recycling options"
-      ]
+      ],
+      environmental_impact: `${fabricType.charAt(0).toUpperCase() + fabricType.slice(1)} is a ${fabricType === 'cotton' || fabricType === 'wool' || fabricType === 'silk' || fabricType === 'linen' ? 'natural' : 'synthetic'} fiber that can be effectively recycled through various methods.`
     };
   } catch (error) {
     console.error('Classification error:', error);
     return {
-      fabric_type: "Unknown",
-      recycling_method: "Standard recycling",
+      material: "Unknown",
       confidence: 0.5,
-      description: `Classification error: ${error.message}`,
+      recyclable: false,
+      biodegradable: false,
+      guidance: "Standard recycling",
       tips: [
         "Check fabric care labels before washing",
         "Consider donating usable fabrics",
         "Research local recycling options"
-      ]
+      ],
+      environmental_impact: `Classification error: ${error.message}`
     };
   }
 };
