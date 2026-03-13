@@ -12,6 +12,7 @@ const Index = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<FabricResult | null>(null);
+  const [modelLoading, setModelLoading] = useState(true); // Add model loading state
   
   // Blog content state
   const [selectedBlogPost, setSelectedBlogPost] = useState<string | null>(null);
@@ -310,8 +311,20 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
   );
 
   const handleAnalyze = async () => {
-    if (!selectedImage || !selectedFile) return;
-
+    console.log('Analyze button clicked');
+    console.log('Selected image:', selectedImage);
+    console.log('Model loading state:', modelLoading);
+    
+    if (!selectedImage) {
+      toast.error('Please select an image first');
+      return;
+    }
+    
+    if (modelLoading) {
+      toast.info('AI model is still loading, please wait...');
+      return;
+    }
+    
     setIsAnalyzing(true);
     setResult(null);
 
@@ -321,7 +334,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
       formData.append('image', selectedFile);
 
       // Call backend API
-      const apiUrl = 'https://fabric-classifier-api.onrender.com/api/classify-fabric';
+      const apiUrl = 'http://localhost:3001/api/classify-fabric';
       
       console.log('Sending request to:', apiUrl);
       console.log('Selected file:', selectedFile);
@@ -910,16 +923,27 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
                 selectedImage={selectedImage}
                 onClear={handleClear}
                 isAnalyzing={isAnalyzing}
+                modelLoading={modelLoading}
               />
 
               {selectedImage && !isAnalyzing && !result && (
                 <Button
                   onClick={handleAnalyze}
                   size="lg"
+                  disabled={modelLoading}
                   className="w-full font-display font-semibold text-lg gap-3 py-6 bg-gradient-to-r from-emerald-500 to-blue-500 hover:from-emerald-600 hover:to-blue-600 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300 rounded-2xl"
                 >
-                  <Sparkles className="w-6 h-6" />
-                  Identify Material
+                  {modelLoading ? (
+                    <>
+                      <div className="w-6 h-6 border-4 border-blue-200 rounded-full animate-spin" />
+                      Analyzing...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-6 h-6" />
+                      Identify Material
+                    </>
+                  )}
                 </Button>
               )}
 

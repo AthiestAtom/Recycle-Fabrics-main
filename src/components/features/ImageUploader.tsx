@@ -7,6 +7,7 @@ interface ImageUploaderProps {
   selectedImage: string | null;
   onClear: () => void;
   isAnalyzing: boolean;
+  modelLoading: boolean; // Add model loading prop
 }
 
 const ImageUploader = ({ onImageSelect, selectedImage, onClear, isAnalyzing }: ImageUploaderProps) => {
@@ -37,16 +38,27 @@ const ImageUploader = ({ onImageSelect, selectedImage, onClear, isAnalyzing }: I
     return (
       <div className="relative rounded-2xl overflow-hidden border-2 border-emerald-200 shadow-xl bg-gradient-to-br from-emerald-50 to-blue-50">
         <img src={selectedImage} alt="Selected fabric" className="w-full max-h-[400px] object-contain" />
-        {!isAnalyzing && (
-          <button
-            onClick={onClear}
-            type="button"
-            aria-label="Clear selected image"
-            className="absolute top-4 right-4 p-3 rounded-full bg-white/90 backdrop-blur-sm text-gray-700 hover:bg-white hover:shadow-lg transition-all duration-300 border border-gray-200"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        )}
+        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-6">
+          {modelLoading ? (
+            <>
+              <div className="w-8 h-8 border-4 border-blue-200 rounded-full animate-spin" />
+              <p className="text-white text-sm">Loading AI model...</p>
+            </>
+          ) : (
+            <>
+              {!isAnalyzing && (
+                <button
+                  onClick={onClear}
+                  type="button"
+                  aria-label="Clear selected image"
+                  className="absolute top-4 right-4 p-3 rounded-full bg-white/90 backdrop-blur-sm text-gray-700 hover:bg-white hover:shadow-lg transition-all duration-300 border border-gray-200"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              )}
+            </>
+          )}
+        </div>
         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-6">
           <div className="flex items-center gap-2 text-white">
             <Camera className="w-5 h-5" />
