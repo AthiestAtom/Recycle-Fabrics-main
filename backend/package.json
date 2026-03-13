@@ -8,7 +8,13 @@
     "dev": "nodemon server.js",
     "build": "echo 'No build step needed'"
   },
-  "keywords": ["fabric", "classification", "gemini", "ai", "recycling"],
+  "keywords": [
+    "fabric",
+    "classification",
+    "gemini",
+    "ai",
+    "recycling"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {

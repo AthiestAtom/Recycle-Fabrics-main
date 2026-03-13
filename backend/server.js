@@ -3,6 +3,7 @@ const cors = require('cors');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+require('dotenv').config();
 
 // Simple environment variable loading
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || 'AIzaSyBpPDgjbxTZ-N_As3dcZJ-yitxkyAQQGyA';
@@ -42,9 +43,10 @@ const classifyFabric = async (imageBuffer) => {
     
     let response;
     let geminiError = null;
+    let data = null;
     
     try {
-      response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+      response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -52,7 +54,7 @@ const classifyFabric = async (imageBuffer) => {
         body: JSON.stringify({
           contents: [{
             parts: [{
-              text: "Analyze this fabric image and classify it. Return a JSON response with: fabric_type, recycling_method, confidence (0-1), and description.",
+              text: "Analyze this fabric image and classify it. Return ONLY a JSON response with these exact keys: fabric_type, recycling_method, confidence (as a decimal between 0 and 1), and description. Do not include any other text.",
               inline_data: {
                 mime_type: mimeType,
                 data: base64Image
@@ -67,8 +69,8 @@ const classifyFabric = async (imageBuffer) => {
         console.log('Gemini error response:', errorText);
         geminiError = new Error(`Gemini API error: ${response.status} - ${errorText}`);
       } else {
-        const data = await response.json();
-        console.log('Gemini response data:', data);
+        data = await response.json();
+        console.log('Gemini response data:', JSON.stringify(data, null, 2));
       }
     } catch (error) {
       console.error('Network or parsing error:', error);
@@ -80,10 +82,10 @@ const classifyFabric = async (imageBuffer) => {
       // Fallback to basic classification if Gemini fails
       console.log('Using fallback classification due to Gemini error:', geminiError.message);
       return {
-        fabric_type: "Cotton",
+        fabric_type: "Unknown",
         recycling_method: "Standard recycling",
-        confidence: 0.7,
-        description: "AI service temporarily unavailable. Please try again.",
+        confidence: 0.3,
+        description: `AI service error: ${geminiError.message}. Please try again later.`,
         tips: [
           "Check fabric care labels before washing",
           "Consider donating usable fabrics",
@@ -99,28 +101,51 @@ const classifyFabric = async (imageBuffer) => {
         const geminiText = data.candidates[0]?.content?.parts?.[0]?.text || "Unable to classify this fabric.";
         console.log('Gemini raw text:', geminiText);
         
-        // Try to extract JSON from the text response
-        const jsonMatch = geminiText.match(/\{[^}]*\}/);
+        // Try to extract JSON from the text response - look for complete JSON objects
+        const jsonMatch = geminiText.match(/\{[\s\S]*\}/);
         if (jsonMatch) {
-          classificationData = JSON.parse(jsonMatch[0]);
+          try {
+            classificationData = JSON.parse(jsonMatch[0]);
+            console.log('Parsed classification data:', classificationData);
+            
+            // Validate required fields
+            if (!classificationData.fabric_type || !classificationData.recycling_method || classificationData.confidence === undefined) {
+              throw new Error('Missing required fields in Gemini response');
+            }
+            
+            // Ensure confidence is a valid number between 0 and 1
+            if (typeof classificationData.confidence !== 'number' || classificationData.confidence < 0 || classificationData.confidence > 1) {
+              console.log('Invalid confidence value, defaulting to 0.5');
+              classificationData.confidence = 0.5;
+            }
+          } catch (parseError) {
+            console.log('Failed to parse JSON from Gemini response:', parseError);
+            classificationData = {
+              fabric_type: "Unknown",
+              recycling_method: "Standard recycling",
+              confidence: 0.4,
+              description: `AI response parsing failed. Raw response: ${geminiText.substring(0, 200)}...`
+            };
+          }
         } else {
           console.log('Gemini response is not JSON format, using text as description');
           classificationData = {
             fabric_type: "Unknown",
             recycling_method: "Standard recycling",
-            confidence: 0.6,
+            confidence: 0.4,
             description: geminiText
           };
         }
+      } else {
+        throw new Error('Invalid Gemini response structure');
       }
     } catch (parseError) {
-      console.log('Failed to parse Gemini response as JSON:', parseError);
-      console.log('Response that failed to parse:', geminiText);
+      console.log('Failed to process Gemini response:', parseError);
       classificationData = {
         fabric_type: "Unknown",
         recycling_method: "Standard recycling",
-        confidence: 0.5,
-        description: geminiText
+        confidence: 0.3,
+        description: `AI processing failed: ${parseError.message}`
       };
     }
     
@@ -185,6 +210,100 @@ app.get('/api/test', (req, res) => {
     api_key_value: process.env.GEMINI_API_KEY ? `${process.env.GEMINI_API_KEY.substring(0, 10)}...` : 'NOT_SET',
     env_vars_count: Object.keys(process.env).filter(key => key.includes('GEMINI')).length
   });
+});
+
+// Test API key validity
+app.get('/api/check-key', async (req, res) => {
+  try {
+    console.log('Checking API key validity...');
+    
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${GEMINI_API_KEY}`);
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`API key check failed: ${response.status} - ${errorText}`);
+    }
+    
+    const data = await response.json();
+    console.log('Available models:', JSON.stringify(data, null, 2));
+    
+    res.json({
+      success: true,
+      message: 'API key is valid',
+      models_count: data.models?.length || 0,
+      available_models: data.models?.map(m => m.name) || []
+    });
+  } catch (error) {
+    console.error('API key check error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'API key check failed',
+      error: error.message
+    });
+  }
+});
+
+// Test Gemini API without image
+app.get('/api/test-gemini', async (req, res) => {
+  try {
+    console.log('Testing Gemini API without image...');
+    
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{
+            text: "Return ONLY a JSON response with these exact keys: fabric_type, recycling_method, confidence (as a decimal between 0 and 1), and description. For this test, classify 'cotton' fabric."
+          }]
+        }]
+      })
+    });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Gemini API error: ${response.status} - ${errorText}`);
+    }
+    
+    const data = await response.json();
+    console.log('Test Gemini response:', JSON.stringify(data, null, 2));
+    
+    if (data.candidates && data.candidates[0]?.content?.parts && data.candidates[0].content.parts[0]?.text) {
+      const geminiText = data.candidates[0].content.parts[0].text;
+      const jsonMatch = geminiText.match(/\{[\s\S]*\}/);
+      
+      if (jsonMatch) {
+        const classificationData = JSON.parse(jsonMatch[0]);
+        res.json({
+          success: true,
+          message: 'Gemini API test successful',
+          result: classificationData,
+          raw_response: geminiText
+        });
+      } else {
+        res.json({
+          success: false,
+          message: 'Could not parse JSON from Gemini response',
+          raw_response: geminiText
+        });
+      }
+    } else {
+      res.json({
+        success: false,
+        message: 'Invalid Gemini response structure',
+        data: data
+      });
+    }
+  } catch (error) {
+    console.error('Gemini test error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Gemini API test failed',
+      error: error.message
+    });
+  }
 });
 
 // Health check endpoint
