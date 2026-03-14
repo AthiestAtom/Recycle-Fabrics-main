@@ -328,7 +328,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
       formData.append('image', selectedFile);
 
       // Call backend API
-      const apiUrl = 'http://localhost:3001/api/classify-fabric';
+      const apiUrl = 'http://127.0.0.1:3001/api/classify-fabric';
       
       console.log('=== SENDING REQUEST ===');
       console.log('API URL:', apiUrl);
