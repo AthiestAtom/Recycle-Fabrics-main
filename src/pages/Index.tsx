@@ -309,6 +309,21 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
     route.area.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  // Test backend connectivity
+  const testBackendConnection = async () => {
+    try {
+      console.log('=== TESTING BACKEND CONNECTION ===');
+      const response = await fetch('http://127.0.0.1:3001/api/health');
+      console.log('Backend test response:', response.status);
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Backend is reachable:', data);
+      }
+    } catch (error) {
+      console.error('Backend connection failed:', error);
+    }
+  };
+
   const handleAnalyze = async () => {
     console.log('=== ANALYZE BUTTON CLICKED ===');
     console.log('Selected image:', selectedImage);
@@ -942,14 +957,24 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
               />
 
               {selectedImage && !isAnalyzing && !result && (
-                <Button
-                  onClick={handleAnalyze}
-                  size="lg"
-                  className="w-full font-display font-semibold text-lg gap-3 py-6 bg-gradient-to-r from-emerald-500 to-blue-500 hover:from-emerald-600 hover:to-blue-600 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300 rounded-2xl"
-                >
-                  <Sparkles className="w-6 h-6" />
-                  Identify Material
-                </Button>
+                <div className="space-y-4">
+                  <Button
+                    onClick={testBackendConnection}
+                    size="lg"
+                    variant="outline"
+                    className="w-full font-display text-lg py-4 border-2 border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-all duration-300 rounded-2xl"
+                  >
+                    Test Backend Connection
+                  </Button>
+                  <Button
+                    onClick={handleAnalyze}
+                    size="lg"
+                    className="w-full font-display font-semibold text-lg gap-3 py-6 bg-gradient-to-r from-emerald-500 to-blue-500 hover:from-emerald-600 hover:to-blue-600 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300 rounded-2xl"
+                  >
+                    <Sparkles className="w-6 h-6" />
+                    Identify Material
+                  </Button>
+                </div>
               )}
 
               {isAnalyzing && <AnalyzingState />}
