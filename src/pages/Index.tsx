@@ -310,8 +310,9 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
   );
 
   const handleAnalyze = async () => {
-    console.log('Analyze button clicked');
+    console.log('=== ANALYZE BUTTON CLICKED ===');
     console.log('Selected image:', selectedImage);
+    console.log('Selected file:', selectedFile);
     
     if (!selectedImage) {
       toast.error('Please select an image first');
@@ -329,15 +330,19 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
       // Call backend API
       const apiUrl = 'http://localhost:3001/api/classify-fabric';
       
-      console.log('Sending request to:', apiUrl);
+      console.log('=== SENDING REQUEST ===');
+      console.log('API URL:', apiUrl);
       console.log('Selected file:', selectedFile);
+      console.log('FormData entries:', [...formData.entries()]);
       
       const response = await fetch(apiUrl, {
         method: 'POST',
         body: formData,
       });
 
+      console.log('=== RESPONSE RECEIVED ===');
       console.log('Response status:', response.status);
+      console.log('Response headers:', response.headers);
       
       if (!response.ok) {
         const errorText = await response.text();
@@ -346,12 +351,29 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
       }
 
       const data = await response.json();
-      console.log('Success data:', data);
-      setResult(data);
+      console.log('=== SUCCESS DATA ===');
+      console.log('Raw data:', data);
+      console.log('Data type:', typeof data);
+      console.log('Data keys:', Object.keys(data));
+      
+      // Check the structure of the response
+      if (data.success && data.result) {
+        console.log('Setting result:', data.result);
+        setResult(data.result);
+      } else if (data.material) {
+        console.log('Setting result directly:', data);
+        setResult(data);
+      } else {
+        console.error('Unexpected response structure:', data);
+        throw new Error('Invalid response format from server');
+      }
     } catch (err: any) {
-      console.error("Classification error:", err);
+      console.error("=== CLASSIFICATION ERROR ===");
+      console.error("Error:", err);
+      console.error("Error message:", err.message);
       toast.error(err.message || "Failed to classify fabric. Please try again.");
     } finally {
+      console.log('=== ANALYSIS COMPLETE ===');
       setIsAnalyzing(false);
     }
   };
