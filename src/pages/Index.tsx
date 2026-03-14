@@ -338,6 +338,8 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
       const response = await fetch(apiUrl, {
         method: 'POST',
         body: formData,
+        mode: 'cors',
+        cache: 'no-cache',
       });
 
       console.log('=== RESPONSE RECEIVED ===');

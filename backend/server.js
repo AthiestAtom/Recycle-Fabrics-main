@@ -8,11 +8,13 @@ const PORT = process.env.BACKEND_PORT || 3001;
 
 // Middleware
 app.use(cors({
-  origin: ['http://localhost:8080', 'http://localhost:3000', 'http://127.0.0.1:8080'],
-  credentials: true
+  origin: ['http://localhost:8080', 'http://localhost:3000', 'http://127.0.0.1:8080', 'http://localhost:5173'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 // Configure multer for file uploads
 const storage = multer.memoryStorage();
@@ -186,28 +188,47 @@ function analyzeColors(buffer) {
 
 // Fabric classification endpoint
 app.post('/api/classify-fabric', upload.single('image'), async (req, res) => {
+  console.log('=== CLASSIFICATION REQUEST RECEIVED ===');
+  console.log('Request headers:', req.headers);
+  console.log('Request file:', req.file);
+  console.log('Request body:', req.body);
+  
   try {
     if (!req.file) {
+      console.log('ERROR: No image file provided');
       return res.status(400).json({ error: 'No image file provided' });
     }
 
+    console.log('=== PROCESSING IMAGE ===');
     console.log('Received image:', req.file.originalname);
     console.log('Image size:', req.file.size);
     console.log('Image type:', req.file.mimetype);
 
     const result = await classifyFabric(req.file.buffer);
     
-    res.json({
+    console.log('=== CLASSIFICATION RESULT ===');
+    console.log('Result:', result);
+    
+    const response = {
       success: true,
       result: result,
       timestamp: new Date().toISOString()
-    });
+    };
+    
+    console.log('=== SENDING RESPONSE ===');
+    console.log('Response:', response);
+    
+    res.json(response);
 
   } catch (error) {
-    console.error('Classification error:', error);
+    console.error('=== CLASSIFICATION ERROR ===');
+    console.error('Error:', error);
+    console.error('Error stack:', error.stack);
+    
     res.status(500).json({ 
       error: 'Classification failed',
-      message: error.message 
+      message: error.message,
+      stack: error.stack
     });
   }
 });
