@@ -313,7 +313,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
   const testBackendConnection = async () => {
     try {
       console.log('=== TESTING BACKEND CONNECTION ===');
-      const response = await fetch('http://127.0.0.1:3001/api/health');
+      const response = await fetch('/api/health');
       console.log('Backend test response:', response.status);
       if (response.ok) {
         const data = await response.json();
@@ -343,7 +343,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
       formData.append('image', selectedFile);
 
       // Call backend API
-      const apiUrl = 'http://127.0.0.1:3001/api/classify-fabric';
+      const apiUrl = '/api/classify-fabric';
       
       console.log('=== SENDING REQUEST ===');
       console.log('API URL:', apiUrl);
