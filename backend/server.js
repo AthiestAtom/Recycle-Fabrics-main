@@ -7,7 +7,10 @@ const app = express();
 const PORT = process.env.BACKEND_PORT || 3001;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: ['http://localhost:8080', 'http://localhost:3000', 'http://127.0.0.1:8080'],
+  credentials: true
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
