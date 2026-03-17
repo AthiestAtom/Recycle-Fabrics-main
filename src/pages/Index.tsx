@@ -314,13 +314,6 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
   );
 
   const handleAnalyze = async () => {
-    console.log('=== ANALYZE BUTTON CLICKED ===');
-    console.log('Selected image:', selectedImage);
-    console.log('Selected file:', selectedFile);
-    console.log('Selected file exists:', !!selectedFile);
-    console.log('Selected file type:', selectedFile?.type);
-    console.log('Selected file size:', selectedFile?.size);
-    
     if (!selectedImage) {
       toast.error('Please select an image first');
       return;
@@ -341,14 +334,6 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
       // Call backend API with cache-busting
       const apiUrl = '/api/classify-fabric?t=' + Date.now();
-      
-      console.log('=== SENDING REQUEST ===');
-      console.log('API URL:', apiUrl);
-      console.log('Selected file:', selectedFile);
-      console.log('Selected file type:', selectedFile?.type);
-      console.log('Selected file size:', selectedFile?.size);
-      console.log('FormData entries:', [...formData.entries()]);
-      console.log('FormData has image:', formData.has('image'));
       
       const response = await fetch(apiUrl, {
         method: 'POST',
