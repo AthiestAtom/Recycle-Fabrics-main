@@ -13,10 +13,26 @@ const ImageUploader = ({ onImageSelect, selectedImage, onClear, isAnalyzing }: I
   const [isDragging, setIsDragging] = useState(false);
 
   const handleFile = useCallback((file: File) => {
-    if (!file.type.startsWith("image/")) return;
+    console.log('=== FILE SELECTED ===');
+    console.log('File:', file);
+    console.log('File name:', file.name);
+    console.log('File type:', file.type);
+    console.log('File size:', file.size);
+    console.log('Is image:', file.type.startsWith("image/"));
+    
+    if (!file.type.startsWith("image/")) {
+      console.log('❌ Not an image file, rejecting');
+      return;
+    }
+    
+    console.log('✅ Image file accepted');
     const reader = new FileReader();
     reader.onload = (e) => {
+      console.log('✅ File loaded, calling onImageSelect');
       onImageSelect(file, e.target?.result as string);
+    };
+    reader.onerror = (error) => {
+      console.error('❌ FileReader error:', error);
     };
     reader.readAsDataURL(file);
   }, [onImageSelect]);

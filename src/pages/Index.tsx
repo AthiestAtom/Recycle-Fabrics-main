@@ -225,9 +225,18 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
   ];
 
   const handleImageSelect = useCallback((file: File, preview: string) => {
+    console.log('=== IMAGE SELECT CALLBACK ===');
+    console.log('File received:', file);
+    console.log('Preview received:', preview ? 'Yes' : 'No');
+    console.log('File name:', file.name);
+    console.log('File type:', file.type);
+    console.log('File size:', file.size);
+    
     setSelectedFile(file);
     setSelectedImage(preview);
     setResult(null);
+    
+    console.log('✅ State updated - selectedFile and selectedImage set');
   }, []);
 
   const handleClear = useCallback(() => {
@@ -317,9 +326,17 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
     console.log('=== ANALYZE BUTTON CLICKED ===');
     console.log('Selected image:', selectedImage);
     console.log('Selected file:', selectedFile);
+    console.log('Selected file exists:', !!selectedFile);
+    console.log('Selected file type:', selectedFile?.type);
+    console.log('Selected file size:', selectedFile?.size);
     
     if (!selectedImage) {
       toast.error('Please select an image first');
+      return;
+    }
+    
+    if (!selectedFile) {
+      toast.error('No file selected - please try selecting the image again');
       return;
     }
     
@@ -340,6 +357,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
       console.log('Selected file type:', selectedFile?.type);
       console.log('Selected file size:', selectedFile?.size);
       console.log('FormData entries:', [...formData.entries()]);
+      console.log('FormData has image:', formData.has('image'));
       
       const response = await fetch(apiUrl, {
         method: 'POST',
