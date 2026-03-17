@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Test</title>
+</head>
+<body>
+    <h1>API Connection Test</h1>
+    <button onclick="testAPI()">Test API</button>
+    <div id="result"></div>
+
+    <script>
+        async function testAPI() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Testing...';
+            
+            try {
+                // Test health endpoint first
+                console.log('Testing health endpoint...');
+                const healthResponse = await fetch('/api/health');
+                console.log('Health response status:', healthResponse.status);
+                const healthData = await healthResponse.json();
+                console.log('Health data:', healthData);
+                
+                resultDiv.innerHTML += '<br>Health: ' + JSON.stringify(healthData, null, 2);
+                
+                // Test classification endpoint with dummy data
+                console.log('Testing classification endpoint...');
+                const formData = new FormData();
+                const blob = new Blob(['test'], { type: 'image/jpeg' });
+                formData.append('image', blob, 'test.jpg');
+                
+                const classResponse = await fetch('/api/classify-fabric', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                console.log('Classification response status:', classResponse.status);
+                const classData = await classResponse.json();
+                console.log('Classification data:', classData);
+                
+                resultDiv.innerHTML += '<br>Classification: ' + JSON.stringify(classData, null, 2);
+                
+            } catch (error) {
+                console.error('Test error:', error);
+                resultDiv.innerHTML += '<br>Error: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>

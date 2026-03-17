@@ -331,12 +331,14 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
       const formData = new FormData();
       formData.append('image', selectedFile);
 
-      // Call backend API
-      const apiUrl = '/api/classify-fabric';
+      // Call backend API with cache-busting
+      const apiUrl = '/api/classify-fabric?t=' + Date.now();
       
       console.log('=== SENDING REQUEST ===');
       console.log('API URL:', apiUrl);
       console.log('Selected file:', selectedFile);
+      console.log('Selected file type:', selectedFile?.type);
+      console.log('Selected file size:', selectedFile?.size);
       console.log('FormData entries:', [...formData.entries()]);
       
       const response = await fetch(apiUrl, {
@@ -344,6 +346,10 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
         body: formData,
         mode: 'cors',
         cache: 'no-cache',
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        }
       });
 
       console.log('=== RESPONSE RECEIVED ===');
