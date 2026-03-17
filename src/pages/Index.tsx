@@ -323,7 +323,6 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
   );
 
   const handleAnalyze = async () => {
-    alert('Button clicked! Check console for details.');
     console.log('=== ANALYZE BUTTON CLICKED ===');
     console.log('Selected image:', selectedImage);
     console.log('Selected file:', selectedFile);
