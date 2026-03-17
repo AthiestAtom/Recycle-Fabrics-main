@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Deployed Version Test</title>
+</head>
+<body>
+    <h1>Testing Deployed Version</h1>
+    <p>This page will help us identify if the deployed version has the updated code.</p>
+    
+    <h2>Test Steps:</h2>
+    <ol>
+        <li>Select an image using the file input below</li>
+        <li>Click the "Test Classification" button</li>
+        <li>Check if you see "Button clicked!" alert</li>
+    </ol>
+    
+    <input type="file" id="testFile" accept="image/*" style="margin: 20px; padding: 10px;">
+    <br>
+    <button onclick="testClassification()" style="margin: 20px; padding: 15px; background: #10b981; color: white; border: none; border-radius: 5px; cursor: pointer;">
+        Test Classification
+    </button>
+    
+    <div id="result" style="margin: 20px; padding: 10px; border: 1px solid #ccc; border-radius: 5px;"></div>
+    
+    <script>
+        function testClassification() {
+            alert('This is the OLD version with alert!');
+            console.log('OLD VERSION DETECTED - This should not show in deployed version');
+            
+            // Try to call the API
+            const fileInput = document.getElementById('testFile');
+            if (fileInput.files.length === 0) {
+                document.getElementById('result').innerHTML = 'Please select a file first';
+                return;
+            }
+            
+            const file = fileInput.files[0];
+            const formData = new FormData();
+            formData.append('image', file);
+            
+            fetch('/api/classify-fabric', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('result').innerHTML = `
+                    <h3>API Response:</h3>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+            })
+            .catch(error => {
+                document.getElementById('result').innerHTML = `
+                    <h3>Error:</h3>
+                    <p>${error.message}</p>
+                `;
+            });
+        }
+    </script>
+</body>
+</html>
