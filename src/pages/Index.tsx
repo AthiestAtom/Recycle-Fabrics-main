@@ -362,12 +362,9 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
         throw new Error('Invalid response format from server');
       }
     } catch (err: any) {
-      console.error("=== CLASSIFICATION ERROR ===");
-      console.error("Error:", err);
-      console.error("Error message:", err.message);
+      console.error("Classification error:", err);
       toast.error(err.message || "Failed to classify fabric. Please try again.");
     } finally {
-      console.log('=== ANALYSIS COMPLETE ===');
       setIsAnalyzing(false);
     }
   };
