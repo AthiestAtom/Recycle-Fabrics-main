@@ -3,10 +3,15 @@
  * Complete TensorFlow.js implementation for fabric classification
  */
 
-const tf = require('@tensorflow/tfjs-node');
+const tf = require('@tensorflow/tfjs');
 const { FabricViTConfig } = require('./config');
 const { FabricViTModel } = require('./model');
 const { FabricImageProcessor } = require('./processor');
+
+// Set backend to CPU for Node.js environment
+tf.setBackend('cpu').then(() => {
+  console.log('TensorFlow.js backend set to CPU');
+});
 
 class FabricClassifier {
   constructor(config = null, modelPath = null) {
@@ -227,6 +232,12 @@ class FabricClassifier {
   
   async classifyFabric(imageBuffer) {
     try {
+      // Wait for TensorFlow.js to be ready
+      await tf.ready();
+      
+      console.log('=== FABRIC CLASSIFICATION ===');
+      console.log('Processing image...');
+      
       // Get prediction
       const prediction = await this.predict(imageBuffer, true);
       
