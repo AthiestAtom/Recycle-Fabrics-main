@@ -92,8 +92,8 @@ const ImageUploader = ({ onImageSelect, selectedImage, onClear, isAnalyzing }: I
         onChange={handleInputChange}
         className="absolute inset-0 opacity-0 cursor-pointer"
         id="fabric-upload"
+        name="fabric-upload"
         aria-label="Upload fabric image for classification"
-        name="fabric-image"
       />
       <div className="flex flex-col items-center gap-6">
         <div className={`w-20 h-20 rounded-full flex items-center justify-center transition-all duration-300 ${
