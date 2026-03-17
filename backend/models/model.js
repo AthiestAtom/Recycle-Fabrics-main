@@ -34,7 +34,7 @@ class FabricViTModel {
       
       // Transformer encoder layers
       for (let i = 0; i < this.config.num_hidden_layers; i++) {
-        x = this.transformerLayer(x, i);
+        x = this.transformerLayer(x);
       }
       
       // Classification head - use global average pooling instead of CLS token
