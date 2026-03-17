@@ -225,18 +225,9 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
   ];
 
   const handleImageSelect = useCallback((file: File, preview: string) => {
-    console.log('=== IMAGE SELECT CALLBACK ===');
-    console.log('File received:', file);
-    console.log('Preview received:', preview ? 'Yes' : 'No');
-    console.log('File name:', file.name);
-    console.log('File type:', file.type);
-    console.log('File size:', file.size);
-    
     setSelectedFile(file);
     setSelectedImage(preview);
     setResult(null);
-    
-    console.log('✅ State updated - selectedFile and selectedImage set');
   }, []);
 
   const handleClear = useCallback(() => {
