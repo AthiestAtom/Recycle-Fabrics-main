@@ -346,31 +346,19 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
         }
       });
 
-      console.log('=== RESPONSE RECEIVED ===');
-      console.log('Response status:', response.status);
-      console.log('Response headers:', response.headers);
-      
       if (!response.ok) {
         const errorText = await response.text();
-        console.log('Error response text:', errorText);
         throw new Error(`Server error: ${response.status}`);
       }
 
       const data = await response.json();
-      console.log('=== SUCCESS DATA ===');
-      console.log('Raw data:', data);
-      console.log('Data type:', typeof data);
-      console.log('Data keys:', Object.keys(data));
       
       // Check the structure of the response
       if (data.success && data.result) {
-        console.log('Setting result:', data.result);
         setResult(data.result);
       } else if (data.material) {
-        console.log('Setting result directly:', data);
         setResult(data);
       } else {
-        console.error('Unexpected response structure:', data);
         throw new Error('Invalid response format from server');
       }
     } catch (err: any) {
