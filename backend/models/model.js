@@ -191,15 +191,10 @@ class FabricViTModel {
       name: `gap_${layerIndex}`
     }).apply(key);
     
-    // Simple attention: broadcast attention weights to all patches
+    // Simple attention: use attention weights directly
     const attentionWeightsBroadcast = tf.layers.multiply({
       name: `multiply_${layerIndex}`
-    }).apply([value, tf.onesLike(inputs)]);
-
-    // Apply attention weights to values
-    const weightedValues = tf.layers.multiply({
-      name: `multiply_${layerIndex}_2`
-    }).apply([value, attentionWeightsBroadcast]);
+    }).apply([value, attentionWeights]);
 
     // Output projection
     const output = tf.layers.dense({
