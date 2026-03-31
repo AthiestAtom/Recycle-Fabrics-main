@@ -12,9 +12,9 @@ export default defineConfig(({ mode }: { mode: string }) => ({
     },
     proxy: {
       '/api': {
-        target: 'http://localhost:3001',
+        target: 'https://recycle-fabrics-main.onrender.com',
         changeOrigin: true,
-        secure: false,
+        secure: true,
       }
     }
   },
