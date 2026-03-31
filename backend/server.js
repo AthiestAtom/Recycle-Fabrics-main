@@ -20,8 +20,8 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-// Import Vision Transformer model
-const { FabricViTModel } = require('./models/model');
+// Import working CNN model
+const { SimpleFabricModel } = require('./models/working-model');
 
 // Initialize fabric classifier
 let fabricClassifier = null;
@@ -31,20 +31,10 @@ async function initializeModel() {
   try {
     console.log('=== INITIALIZING FABRIC CLASSIFICATION MODEL ===');
     
-    // Use Vision Transformer model
-    fabricClassifier = new FabricViTModel({
-      image_size: 224,
-      patch_size: 16,
-      hidden_size: 128,
-      num_hidden_layers: 4,
-      num_attention_heads: 4,
-      intermediate_size: 256,
-      layer_norm_eps: 1e-6,
-      num_fabric_classes: 7,
-      fabric_classes: ['cotton', 'polyester', 'wool', 'silk', 'linen', 'nylon', 'rayon']
-    });
-    await fabricClassifier.buildModel();
-    console.log('✅ Using Vision Transformer model');
+    // Use working CNN model
+    fabricClassifier = new SimpleFabricModel();
+    await fabricClassifier.initialize();
+    console.log('✅ Using working CNN model');
     console.log('✅ Fabric classification model initialized successfully');
     console.log(`📊 Model supports ${fabricClassifier.config.num_fabric_classes} fabric classes: ${fabricClassifier.config.fabric_classes.join(', ')}`);
     console.log(`🖼️ Input image size: ${fabricClassifier.config.image_size}x${fabricClassifier.config.image_size}`);
