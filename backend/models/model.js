@@ -4,7 +4,6 @@
  */
 
 const tf = require('@tensorflow/tfjs');
-const { FabricViTConfig } = require('./config');
 
 // Set backend to CPU for Node.js environment
 tf.setBackend('cpu').then(() => {
