@@ -656,17 +656,9 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
       formData.append('image', selectedFile);
 
-<<<<<<< HEAD
 
 
-      // Call backend API with cache-busting
-
-      const apiUrl = '/api/classify-fabric?t=' + Date.now();
-
-=======
-      // Call backend API
-      const apiUrl = import.meta.env.VITE_API_URL || \"https://fabric-classifier-api.onrender.com/api/classify-fabric\";
-      
+      const apiUrl = import.meta.env.VITE_API_URL || "https://fabric-classifier-api.onrender.com/api/classify-fabric";
       console.log('Sending request to:', apiUrl);
       console.log('Selected file:', selectedFile);
 
@@ -4349,4 +4341,6 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
 
 export default Index;
+
+
 
