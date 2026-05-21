@@ -26,29 +26,6 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-// Import local CNN model if available
-let SimpleFabricModel;
-try {
-  const modelModule = require('./models/working-model');
-  SimpleFabricModel = modelModule.SimpleFabricModel;
-} catch (e) {
-  console.log('Local model not found or failed to load, will use Gemini only');
-}
-
-let fabricClassifier = null;
-
-async function initializeModel() {
-  if (SimpleFabricModel) {
-    try {
-      fabricClassifier = new SimpleFabricModel();
-      await fabricClassifier.initialize();
-      console.log('✅ Local CNN model initialized');
-    } catch (error) {
-      console.error('❌ Failed to initialize local model:', error);
-    }
-  }
-}
-
 // Gemini Classification Logic
 const classifyWithGemini = async (imageBuffer) => {
   try {
@@ -98,32 +75,17 @@ app.post('/api/classify-fabric', upload.single('image'), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: 'No image file' });
 
-    let result = null;
-
-    // 1. Try Local Model first if available
-    if (fabricClassifier) {
-      try {
-        result = await fabricClassifier.classify(req.file.buffer);
-        console.log('✅ Classified with local model:', result.material);
-      } catch (e) {
-        console.error('Local model classification failed:', e);
-      }
-    }
-
-    // 2. Try Gemini if local fails or not available
-    if (!result) {
-      result = await classifyWithGemini(req.file.buffer);
-      if (result) console.log('✅ Classified with Gemini:', result.material);
-    }
-
-    // 3. Fallback
+    // Use Gemini API for classification
+    let result = await classifyWithGemini(req.file.buffer);
+    
+    // Fallback if Gemini fails
     if (!result) {
       result = {
         material: 'Cotton',
-        confidence: 0.7,
+        confidence: 0.5,
         recyclable: true,
         biodegradable: true,
-        guidance: 'Standard recycling',
+        guidance: 'Please try again or contact support.',
         tips: ['Check labels', 'Consider donating'],
         environmental_impact: 'AI service temporarily unavailable'
       };
@@ -140,9 +102,13 @@ app.post('/api/classify-fabric', upload.single('image'), async (req, res) => {
   }
 });
 
-app.get('/api/health', (req, res) => res.json({ status: 'OK', model_ready: !!fabricClassifier }));
+app.get('/api/health', (req, res) => res.json({ 
+  status: 'OK', 
+  model_type: 'Google Gemini 1.5 Flash Vision API',
+  model_ready: true 
+}));
 
-app.listen(PORT, async () => {
-  console.log(\🚀 Backend running on port \\);
-  await initializeModel();
+app.listen(PORT, () => {
+  console.log(`🚀 Backend running on port ${PORT}`);
+  console.log('✅ Using Google Gemini API for fabric classification');
 });
