@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+﻿import { useState, useCallback } from "react";
 
 import { toast } from "sonner";
 
@@ -68,7 +68,7 @@ const Index = () => {
 
       name: 'Cotton', 
 
-      icon: '🌱', 
+      icon: 'ðŸŒ±', 
 
       recyclable: true, 
 
@@ -90,7 +90,7 @@ const Index = () => {
 
       name: 'Denim', 
 
-      icon: '👖', 
+      icon: 'ðŸ‘–', 
 
       recyclable: true, 
 
@@ -112,7 +112,7 @@ const Index = () => {
 
       name: 'Polyester', 
 
-      icon: '🏭', 
+      icon: 'ðŸ­', 
 
       recyclable: true, 
 
@@ -134,7 +134,7 @@ const Index = () => {
 
       name: 'Silk', 
 
-      icon: '🎭', 
+      icon: 'ðŸŽ­', 
 
       recyclable: false, 
 
@@ -156,7 +156,7 @@ const Index = () => {
 
       name: 'Wool', 
 
-      icon: '🐑', 
+      icon: 'ðŸ‘', 
 
       recyclable: true, 
 
@@ -178,7 +178,7 @@ const Index = () => {
 
       name: 'Leather', 
 
-      icon: '👜', 
+      icon: 'ðŸ‘œ', 
 
       recyclable: false, 
 
@@ -200,7 +200,7 @@ const Index = () => {
 
       name: 'Nylon', 
 
-      icon: '🧦', 
+      icon: 'ðŸ§¦', 
 
       recyclable: true, 
 
@@ -222,7 +222,7 @@ const Index = () => {
 
       name: 'Linen', 
 
-      icon: '☘️', 
+      icon: 'â˜˜ï¸', 
 
       recyclable: true, 
 
@@ -244,7 +244,7 @@ const Index = () => {
 
       name: 'Mixed/Blended', 
 
-      icon: '🎨', 
+      icon: 'ðŸŽ¨', 
 
       recyclable: false, 
 
@@ -658,9 +658,9 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
 
 
-      // Call backend API with cache-busting
-
-      const apiUrl = '/api/classify-fabric?t=' + Date.now();
+      const apiUrl = import.meta.env.VITE_API_URL || "https://fabric-classifier-api.onrender.com/api/classify-fabric";
+      console.log('Sending request to:', apiUrl);
+      console.log('Selected file:', selectedFile);
 
       
 
@@ -1150,7 +1150,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                 <div className="text-5xl font-bold text-white mb-2">2.5M</div>
 
-                <div className="text-white/80 font-medium">kg CO₂ Saved</div>
+                <div className="text-white/80 font-medium">kg COâ‚‚ Saved</div>
 
                 <div className="text-white/60 text-sm mt-1">Environmental impact</div>
 
@@ -1296,7 +1296,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                   >
 
-                    Learn More →
+                    Learn More â†’
 
                   </button>
 
@@ -1346,7 +1346,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                 <div className="w-16 h-16 rounded-2xl bg-gradient-to-r from-blue-500 to-cyan-500 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
 
-                  <span className="text-2xl">💧</span>
+                  <span className="text-2xl">ðŸ’§</span>
 
                 </div>
 
@@ -1396,7 +1396,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                 <div className="w-16 h-16 rounded-2xl bg-gradient-to-r from-green-500 to-emerald-500 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
 
-                  <span className="text-2xl">🌿</span>
+                  <span className="text-2xl">ðŸŒ¿</span>
 
                 </div>
 
@@ -1446,7 +1446,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                 <div className="w-16 h-16 rounded-2xl bg-gradient-to-r from-orange-500 to-red-500 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
 
-                  <span className="text-2xl">☀️</span>
+                  <span className="text-2xl">â˜€ï¸</span>
 
                 </div>
 
@@ -1504,7 +1504,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                   <div className="bg-white rounded-xl p-4">
 
-                    <div className="font-semibold text-purple-700 mb-2">👕 Cotton</div>
+                    <div className="font-semibold text-purple-700 mb-2">ðŸ‘• Cotton</div>
 
                     <div className="text-sm text-gray-600">Machine wash cold, tumble dry low</div>
 
@@ -1512,7 +1512,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                   <div className="bg-white rounded-xl p-4">
 
-                    <div className="font-semibold text-blue-700 mb-2">👖 Denim</div>
+                    <div className="font-semibold text-blue-700 mb-2">ðŸ‘– Denim</div>
 
                     <div className="text-sm text-gray-600">Wash inside out, air dry recommended</div>
 
@@ -1520,7 +1520,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                   <div className="bg-white rounded-xl p-4">
 
-                    <div className="font-semibold text-green-700 mb-2">🧦 Wool</div>
+                    <div className="font-semibold text-green-700 mb-2">ðŸ§¦ Wool</div>
 
                     <div className="text-sm text-gray-600">Hand wash cold, lay flat to dry</div>
 
@@ -1528,7 +1528,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                   <div className="bg-white rounded-xl p-4">
 
-                    <div className="font-semibold text-pink-700 mb-2">🎭 Silk</div>
+                    <div className="font-semibold text-pink-700 mb-2">ðŸŽ­ Silk</div>
 
                     <div className="text-sm text-gray-600">Dry clean only or hand wash gently</div>
 
@@ -1590,7 +1590,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                   <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-4">
 
-                    <span className="text-2xl">👕</span>
+                    <span className="text-2xl">ðŸ‘•</span>
 
                   </div>
 
@@ -1606,13 +1606,13 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                   <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-4">
 
-                    <span className="text-2xl">⚡</span>
+                    <span className="text-2xl">âš¡</span>
 
                   </div>
 
                   <div className="text-3xl font-bold text-white mb-2">7kg</div>
 
-                  <div className="text-white/80 font-medium">CO₂ Reduced</div>
+                  <div className="text-white/80 font-medium">COâ‚‚ Reduced</div>
 
                   <div className="text-white/60 text-sm mt-1">Per kg of recycled polyester</div>
 
@@ -1622,7 +1622,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                   <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-4">
 
-                    <span className="text-2xl">🌍</span>
+                    <span className="text-2xl">ðŸŒ</span>
 
                   </div>
 
@@ -1718,7 +1718,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                           <div className="font-semibold text-gray-800">{location.name}</div>
 
-                          <div className="text-sm text-gray-600">{location.type} • {location.distance}</div>
+                          <div className="text-sm text-gray-600">{location.type} â€¢ {location.distance}</div>
 
                         </div>
 
@@ -1728,7 +1728,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                         <div className="flex items-center gap-1 text-yellow-500 text-sm">
 
-                          <span>⭐</span>
+                          <span>â­</span>
 
                           <span className="font-medium">{location.rating}</span>
 
@@ -1834,7 +1834,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
             <p className="text-xl text-gray-600 font-light">
 
-              Take a clear photo of the fabric — the closer, the better
+              Take a clear photo of the fabric â€” the closer, the better
 
             </p>
 
@@ -1958,7 +1958,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                 >
 
-                  ← Back to Blog
+                  â† Back to Blog
 
                 </button>
 
@@ -2038,7 +2038,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                         <div className="absolute inset-0 flex items-center justify-center">
 
-                          <span className="text-6xl">{index === 0 ? '🌍' : index === 1 ? '♻️' : '👗'}</span>
+                          <span className="text-6xl">{index === 0 ? 'ðŸŒ' : index === 1 ? 'â™»ï¸' : 'ðŸ‘—'}</span>
 
                         </div>
 
@@ -2110,7 +2110,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                         >
 
-                          Read More →
+                          Read More â†’
 
                         </button>
 
@@ -2176,7 +2176,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
             <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white font-semibold mb-6">
 
-              <span className="text-2xl">🏆</span>
+              <span className="text-2xl">ðŸ†</span>
 
               Join the Challenge
 
@@ -2202,7 +2202,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                 <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-4">
 
-                  <span className="text-2xl">🎯</span>
+                  <span className="text-2xl">ðŸŽ¯</span>
 
                 </div>
 
@@ -2218,7 +2218,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                 <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-4">
 
-                  <span className="text-2xl">🌱</span>
+                  <span className="text-2xl">ðŸŒ±</span>
 
                 </div>
 
@@ -2234,7 +2234,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                 <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-4">
 
-                  <span className="text-2xl">🎁</span>
+                  <span className="text-2xl">ðŸŽ</span>
 
                 </div>
 
@@ -2398,7 +2398,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                 <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white font-semibold mb-6">
 
-                  <span className="text-2xl">🚚</span>
+                  <span className="text-2xl">ðŸšš</span>
 
                   Free Pickup Service
 
@@ -2668,7 +2668,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                 <div className="w-16 h-16 rounded-2xl bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center mx-auto mb-4">
 
-                  <span className="text-2xl">🌍</span>
+                  <span className="text-2xl">ðŸŒ</span>
 
                 </div>
 
@@ -2684,7 +2684,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                 <div className="w-16 h-16 rounded-2xl bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center mx-auto mb-4">
 
-                  <span className="text-2xl">♻️</span>
+                  <span className="text-2xl">â™»ï¸</span>
 
                 </div>
 
@@ -2700,7 +2700,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                 <div className="w-16 h-16 rounded-2xl bg-gradient-to-r from-pink-500 to-red-500 flex items-center justify-center mx-auto mb-4">
 
-                  <span className="text-2xl">💧</span>
+                  <span className="text-2xl">ðŸ’§</span>
 
                 </div>
 
@@ -2716,7 +2716,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                 <div className="w-16 h-16 rounded-2xl bg-gradient-to-r from-red-500 to-orange-500 flex items-center justify-center mx-auto mb-4">
 
-                  <span className="text-2xl">🏭</span>
+                  <span className="text-2xl">ðŸ­</span>
 
                 </div>
 
@@ -2754,17 +2754,17 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                       {[
 
-                        { material: 'Cotton', price: '$3.50/kg', icon: '👕' },
+                        { material: 'Cotton', price: '$3.50/kg', icon: 'ðŸ‘•' },
 
-                        { material: 'Denim', price: '$4.50/kg', icon: '👖' },
+                        { material: 'Denim', price: '$4.50/kg', icon: 'ðŸ‘–' },
 
-                        { material: 'Polyester', price: '$2.00/kg', icon: '🧶' },
+                        { material: 'Polyester', price: '$2.00/kg', icon: 'ðŸ§¶' },
 
-                        { material: 'Wool', price: '$6.00/kg', icon: '🐑' },
+                        { material: 'Wool', price: '$6.00/kg', icon: 'ðŸ‘' },
 
-                        { material: 'Silk', price: '$8.00/kg', icon: '🎭' },
+                        { material: 'Silk', price: '$8.00/kg', icon: 'ðŸŽ­' },
 
-                        { material: 'Linen', price: '$5.50/kg', icon: '☘️' }
+                        { material: 'Linen', price: '$5.50/kg', icon: 'â˜˜ï¸' }
 
                       ].map((item, index) => (
 
@@ -2946,7 +2946,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
               <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white font-semibold mb-6">
 
-                <span className="text-2xl">🤝</span>
+                <span className="text-2xl">ðŸ¤</span>
 
                 Our Network
 
@@ -2974,7 +2974,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                 <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-4">
 
-                  <span className="text-2xl">🏢</span>
+                  <span className="text-2xl">ðŸ¢</span>
 
                 </div>
 
@@ -2990,7 +2990,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                 <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-4">
 
-                  <span className="text-2xl">👥</span>
+                  <span className="text-2xl">ðŸ‘¥</span>
 
                 </div>
 
@@ -3006,7 +3006,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                 <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-4">
 
-                  <span className="text-2xl">📍</span>
+                  <span className="text-2xl">ðŸ“</span>
 
                 </div>
 
@@ -3032,7 +3032,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                   <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-4">
 
-                    <span className="text-2xl">🏫</span>
+                    <span className="text-2xl">ðŸ«</span>
 
                   </div>
 
@@ -3046,7 +3046,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                   <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-4">
 
-                    <span className="text-2xl">🏢</span>
+                    <span className="text-2xl">ðŸ¢</span>
 
                   </div>
 
@@ -3060,7 +3060,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                   <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-4">
 
-                    <span className="text-2xl">🛍️</span>
+                    <span className="text-2xl">ðŸ›ï¸</span>
 
                   </div>
 
@@ -3074,7 +3074,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                   <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-4">
 
-                    <span className="text-2xl">🏘️</span>
+                    <span className="text-2xl">ðŸ˜ï¸</span>
 
                   </div>
 
@@ -3274,7 +3274,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
               <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white font-semibold mb-6">
 
-                <span className="text-2xl">🌍</span>
+                <span className="text-2xl">ðŸŒ</span>
 
                 Our Impact
 
@@ -3302,7 +3302,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                 <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-4">
 
-                  <span className="text-2xl">♻️</span>
+                  <span className="text-2xl">â™»ï¸</span>
 
                 </div>
 
@@ -3318,7 +3318,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                 <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-4">
 
-                  <span className="text-2xl">👥</span>
+                  <span className="text-2xl">ðŸ‘¥</span>
 
                 </div>
 
@@ -3334,7 +3334,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                 <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-4">
 
-                  <span className="text-2xl">🌳</span>
+                  <span className="text-2xl">ðŸŒ³</span>
 
                 </div>
 
@@ -3350,7 +3350,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                 <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-4">
 
-                  <span className="text-2xl">💧</span>
+                  <span className="text-2xl">ðŸ’§</span>
 
                 </div>
 
@@ -3418,7 +3418,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                         <div className="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center">
 
-                          <span className="text-white text-sm">🏢</span>
+                          <span className="text-white text-sm">ðŸ¢</span>
 
                         </div>
 
@@ -3436,7 +3436,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                         <div className="w-8 h-8 rounded-lg bg-blue-500 flex items-center justify-center">
 
-                          <span className="text-white text-sm">🏫</span>
+                          <span className="text-white text-sm">ðŸ«</span>
 
                         </div>
 
@@ -3454,7 +3454,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                         <div className="w-8 h-8 rounded-lg bg-purple-500 flex items-center justify-center">
 
-                          <span className="text-white text-sm">🏘️</span>
+                          <span className="text-white text-sm">ðŸ˜ï¸</span>
 
                         </div>
 
@@ -3498,7 +3498,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
             <p className="text-xl text-gray-600 font-light">
 
-              Take a clear photo of the fabric — the closer, the better
+              Take a clear photo of the fabric â€” the closer, the better
 
             </p>
 
@@ -3644,7 +3644,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                 <div className="w-16 h-16 rounded-2xl bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center mx-auto mb-4">
 
-                  <span className="text-2xl">🛍️</span>
+                  <span className="text-2xl">ðŸ›ï¸</span>
 
                 </div>
 
@@ -3660,7 +3660,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                 <div className="w-16 h-16 rounded-2xl bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center mx-auto mb-4">
 
-                  <span className="text-2xl">👥</span>
+                  <span className="text-2xl">ðŸ‘¥</span>
 
                 </div>
 
@@ -3676,7 +3676,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                 <div className="w-16 h-16 rounded-2xl bg-gradient-to-r from-pink-500 to-red-500 flex items-center justify-center mx-auto mb-4">
 
-                  <span className="text-2xl">♻️</span>
+                  <span className="text-2xl">â™»ï¸</span>
 
                 </div>
 
@@ -3692,7 +3692,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                 <div className="w-16 h-16 rounded-2xl bg-gradient-to-r from-red-500 to-orange-500 flex items-center justify-center mx-auto mb-4">
 
-                  <span className="text-2xl">⭐</span>
+                  <span className="text-2xl">â­</span>
 
                 </div>
 
@@ -3772,7 +3772,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                         price: 45, 
 
-                        image: "🌱", 
+                        image: "ðŸŒ±", 
 
                         seller: "EcoTextiles Pro",
 
@@ -3794,7 +3794,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                         price: 28, 
 
-                        image: "👖", 
+                        image: "ðŸ‘–", 
 
                         seller: "RetroFashion",
 
@@ -3816,7 +3816,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                         price: 35, 
 
-                        image: "🎭", 
+                        image: "ðŸŽ­", 
 
                         seller: "GreenCrafts",
 
@@ -3838,7 +3838,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                         price: 22, 
 
-                        image: "♻️", 
+                        image: "â™»ï¸", 
 
                         seller: "FabricWholesale",
 
@@ -3860,7 +3860,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                         price: 52, 
 
-                        image: "☘️", 
+                        image: "â˜˜ï¸", 
 
                         seller: "NaturalDyes Co",
 
@@ -3882,7 +3882,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                         price: 38, 
 
-                        image: "🐑", 
+                        image: "ðŸ‘", 
 
                         seller: "CozyYarns",
 
@@ -3904,7 +3904,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                         price: 67, 
 
-                        image: "🎨", 
+                        image: "ðŸŽ¨", 
 
                         seller: "LuxuryTextiles",
 
@@ -3926,7 +3926,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                         price: 19, 
 
-                        image: "🏕️", 
+                        image: "ðŸ•ï¸", 
 
                         seller: "EcoCanvas",
 
@@ -4010,7 +4010,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                             <div className="flex items-center gap-1 text-sm">
 
-                              <span className="text-yellow-500">⭐</span>
+                              <span className="text-yellow-500">â­</span>
 
                               <span className="font-medium">{item.rating}</span>
 
@@ -4130,7 +4130,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                     {[1, 2, 3, 4, 5].map((star) => (
 
-                      <div key={star} className="w-5 h-5 text-yellow-400">⭐</div>
+                      <div key={star} className="w-5 h-5 text-yellow-400">â­</div>
 
                     ))}
 
@@ -4176,7 +4176,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                     {[1, 2, 3, 4, 5].map((star) => (
 
-                      <div key={star} className="w-5 h-5 text-yellow-400">⭐</div>
+                      <div key={star} className="w-5 h-5 text-yellow-400">â­</div>
 
                     ))}
 
@@ -4222,7 +4222,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                     {[1, 2, 3, 4, 5].map((star) => (
 
-                      <div key={star} className="w-5 h-5 text-yellow-400">⭐</div>
+                      <div key={star} className="w-5 h-5 text-yellow-400">â­</div>
 
                     ))}
 
@@ -4341,4 +4341,6 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
 
 export default Index;
+
+
 

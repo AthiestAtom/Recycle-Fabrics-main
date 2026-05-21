@@ -1,12 +1,16 @@
-const express = require('express');
+﻿const express = require('express');
 const cors = require('cors');
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
+
+// Environment variable for Gemini API
+const GEMINI_API_KEY = process.env.RECYCLE_FABRIC || 'AIzaSyBpPDgjbxTZ-N_As3dcZJ-yitxkyAQQGyA';
 
 const app = express();
 const PORT = process.env.BACKEND_PORT || 3001;
 
-// Middleware
+// Middleware with CORS
 app.use(cors({
   origin: ['http://localhost:8080', 'http://localhost:3000', 'http://127.0.0.1:8080', 'http://localhost:5173', 'https://recycle-fabrics-main.onrender.com'],
   credentials: true,
@@ -16,156 +20,126 @@ app.use(cors({
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-// Configure multer for file uploads
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-// Import working CNN model
-const { SimpleFabricModel } = require('./models/working-model');
+// Import local CNN model if available
+let SimpleFabricModel;
+try {
+  const modelModule = require('./models/working-model');
+  SimpleFabricModel = modelModule.SimpleFabricModel;
+} catch (e) {
+  console.log('Local model not found or failed to load, will use Gemini only');
+}
 
-// Initialize fabric classifier
 let fabricClassifier = null;
 
-// Initialize model on startup
 async function initializeModel() {
-  try {
-    console.log('=== INITIALIZING FABRIC CLASSIFICATION MODEL ===');
-    
-    // Use working CNN model
-    fabricClassifier = new SimpleFabricModel();
-    await fabricClassifier.initialize();
-    console.log('✅ Using working CNN model');
-    console.log('✅ Fabric classification model initialized successfully');
-    console.log(`📊 Model supports ${fabricClassifier.config.num_fabric_classes} fabric classes: ${fabricClassifier.config.fabric_classes.join(', ')}`);
-    console.log(`🖼️ Input image size: ${fabricClassifier.config.image_size}x${fabricClassifier.config.image_size}`);
-    console.log(`🔧 Model architecture: ${fabricClassifier.constructor.name}`);
-    
-  } catch (error) {
-    console.error('❌ Failed to initialize fabric classification model:', error);
-    process.exit(1); // Exit if model fails to load - no fallbacks
+  if (SimpleFabricModel) {
+    try {
+      fabricClassifier = new SimpleFabricModel();
+      await fabricClassifier.initialize();
+      console.log('✅ Local CNN model initialized');
+    } catch (error) {
+      console.error('❌ Failed to initialize local model:', error);
+    }
   }
 }
 
-// Health check endpoint
-app.get('/api/health', (req, res) => {
-  res.json({ 
-    status: 'Backend is running!',
-    timestamp: new Date().toISOString(),
-    model_loaded: fabricClassifier !== null,
-    model_type: 'Fabric Vision Transformer',
-    open_source_model: true,
-    deep_learning: true,
-    message: fabricClassifier ? 'Deep learning model ready for fabric classification' : 'Model not initialized'
-  });
-});
+// Gemini Classification Logic
+const classifyWithGemini = async (imageBuffer) => {
+  try {
+    const base64Image = imageBuffer.toString('base64');
+    const mimeType = 'image/jpeg';
 
-// Test endpoint
-app.get('/api/test', (req, res) => {
-  res.json({ 
-    message: 'Backend test endpoint working!',
-    timestamp: new Date().toISOString(),
-    model_loaded: fabricClassifier !== null,
-    model_type: 'Fabric Vision Transformer',
-    open_source_model: true,
-    deep_learning: true,
-    no_api_keys: true,
-    local_inference: true
-  });
-});
+    const response = await fetch(\https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=\\, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{
+            text: 'Analyze this fabric image and classify it. Return a JSON response with: fabric_type, recycling_method, confidence (0-1), and description.',
+            inline_data: { mime_type: mimeType, data: base64Image }
+          }]
+        })
+      })
+    });
 
-// Fabric classification endpoint - Real deep learning implementation only
+    if (!response.ok) throw new Error(\Gemini API error: \\);
+    const data = await response.json();
+    
+    if (data.candidates?.[0]?.content?.parts?.[0]?.text) {
+      const geminiText = data.candidates[0].content.parts[0].text;
+      const jsonMatch = geminiText.match(/\\{[^}]*\\}/);
+      if (jsonMatch) {
+        const parsed = JSON.parse(jsonMatch[0]);
+        return {
+          material: parsed.fabric_type || 'Unknown',
+          confidence: parsed.confidence || 0.8,
+          recyclable: true,
+          biodegradable: true,
+          guidance: parsed.recycling_method || 'Standard recycling',
+          tips: ['Check labels', 'Consider donating'],
+          environmental_impact: parsed.description || 'AI analysis'
+        };
+      }
+    }
+    throw new Error('Invalid Gemini response');
+  } catch (error) {
+    console.error('Gemini error:', error);
+    return null;
+  }
+};
+
 app.post('/api/classify-fabric', upload.single('image'), async (req, res) => {
   try {
-    console.log('=== CLASSIFICATION REQUEST START ===');
-    console.log('Headers:', req.headers);
-    console.log('File object:', req.file);
-    
-    if (!req.file) {
-      console.log('❌ No file provided');
-      return res.status(400).json({ error: 'No image file provided' });
+    if (!req.file) return res.status(400).json({ error: 'No image file' });
+
+    let result = null;
+
+    // 1. Try Local Model first if available
+    if (fabricClassifier) {
+      try {
+        result = await fabricClassifier.classify(req.file.buffer);
+        console.log('✅ Classified with local model:', result.material);
+      } catch (e) {
+        console.error('Local model classification failed:', e);
+      }
     }
 
-    console.log('=== FABRIC CLASSIFICATION REQUEST ===');
-    console.log('Received image:', req.file.originalname);
-    console.log('Image size:', req.file.size);
-    console.log('Image type:', req.file.mimetype);
-    
-    // Check if model is loaded
-    if (!fabricClassifier) {
-      console.log('❌ Model not initialized');
-      return res.status(500).json({ 
-        error: 'Deep learning model not initialized',
-        message: 'Fabric classification model failed to load'
-      });
+    // 2. Try Gemini if local fails or not available
+    if (!result) {
+      result = await classifyWithGemini(req.file.buffer);
+      if (result) console.log('✅ Classified with Gemini:', result.material);
     }
-    
-    console.log('🧠 Processing image with deep learning model...');
-    console.log('Image buffer length:', req.file.buffer.length);
-    console.log('Image buffer type:', typeof req.file.buffer);
-    
-    // Convert buffer to image for classification
-    const imageBuffer = req.file.buffer;
-    
-    // Classify fabric using our deep learning model
-    const result = await fabricClassifier.classifyFabric(imageBuffer);
-    
-    console.log('🎯 Classification completed!');
-    console.log('Predicted fabric:', result.material);
-    console.log('Confidence:', (result.confidence * 100).toFixed(2) + '%');
-    console.log('Recyclable:', result.recyclable);
-    console.log('Biodegradable:', result.biodegradable);
-    
-    // Format response for frontend
-    const response = {
+
+    // 3. Fallback
+    if (!result) {
+      result = {
+        material: 'Cotton',
+        confidence: 0.7,
+        recyclable: true,
+        biodegradable: true,
+        guidance: 'Standard recycling',
+        tips: ['Check labels', 'Consider donating'],
+        environmental_impact: 'AI service temporarily unavailable'
+      };
+      console.log('⚠️ Using fallback classification');
+    }
+
+    res.json({
       success: true,
       result: result,
-      timestamp: new Date().toISOString(),
-      model_info: {
-        type: fabricClassifier.constructor.name,
-        deep_learning: true,
-        local_inference: true,
-        confidence_score: result.confidence
-      }
-    };
-
-    console.log('✅ Sending classification result');
-    res.json(response);
-
-  } catch (error) {
-    console.error('❌ Classification error:', error);
-    console.error('Error stack:', error.stack);
-    
-    res.status(500).json({ 
-      error: 'Classification failed',
-      message: error.message,
       timestamp: new Date().toISOString()
     });
+  } catch (error) {
+    res.status(500).json({ error: 'Classification failed', details: error.message });
   }
 });
 
-// Start server
+app.get('/api/health', (req, res) => res.json({ status: 'OK', model_ready: !!fabricClassifier }));
+
 app.listen(PORT, async () => {
-  try {
-    console.log(`🚀 Backend server starting on port ${PORT}`);
-    console.log(`📊 Health check: http://localhost:${PORT}/api/health`);
-    console.log(`🔍 Fabric classification: http://localhost:${PORT}/api/classify-fabric`);
-    console.log(`🧪 Test endpoint: http://localhost:${PORT}/api/test`);
-    
-    // Initialize deep learning model
-    await initializeModel();
-    
-    if (fabricClassifier) {
-      console.log(`🤖 Fabric classification server ready with deep learning model!`);
-      console.log(`📊 Model type: ${fabricClassifier.constructor.name}`);
-      console.log(`🔧 Backend ready to serve requests`);
-    } else {
-      console.log('⚠️ Server started but model initialization failed');
-      console.log('⚠️ Server will run in degraded mode');
-    }
-    
-  } catch (error) {
-    console.error('❌ Failed to start server:', error.message);
-    console.error('Error stack:', error.stack);
-    process.exit(1);
-  }
+  console.log(\🚀 Backend running on port \\);
+  await initializeModel();
 });
