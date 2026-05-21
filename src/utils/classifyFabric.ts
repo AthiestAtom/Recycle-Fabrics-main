@@ -1,4 +1,13 @@
 const API_TIMEOUT_MS = 30_000;
+const DEFAULT_API_ORIGIN = "https://recycle-fabrics-main.onrender.com";
+
+export const getApiOrigin = () => {
+  return import.meta.env.VITE_API_ORIGIN || DEFAULT_API_ORIGIN;
+};
+
+export const getClassificationUrl = () => {
+  return import.meta.env.VITE_API_URL || `${getApiOrigin()}/api/classify-fabric`;
+};
 
 export const classifyFabricImage = async (file: File) => {
   const formData = new FormData();
@@ -6,7 +15,7 @@ export const classifyFabricImage = async (file: File) => {
 
   const controller = new AbortController();
   const timeout = window.setTimeout(() => controller.abort(), API_TIMEOUT_MS);
-  const apiUrl = import.meta.env.VITE_API_URL || "https://fabric-classifier-api.onrender.com/api/classify-fabric";
+  const apiUrl = getClassificationUrl();
 
   try {
     const response = await fetch(apiUrl, {

@@ -1,4 +1,4 @@
-﻿import { useState, useCallback } from "react";
+import { useState, useCallback } from "react";
 
 import { toast } from "sonner";
 
@@ -14,6 +14,7 @@ import VideoBackground from "@/components/common/VideoBackground";
 
 import { Button } from "@/components/ui/button";
 import { classifyFabricImage } from "@/utils/classifyFabric";
+import { createListing, createPartnerApplication, createPickup, createQuote, placeBid } from "@/utils/appApi";
 
 
 
@@ -27,13 +28,13 @@ const Index = () => {
 
   const [result, setResult] = useState<FabricResult | null>(null);
 
-  
+
 
   // Blog content state
 
   const [selectedBlogPost, setSelectedBlogPost] = useState<string | null>(null);
 
-  
+
 
   // New states for functional features
 
@@ -98,21 +99,21 @@ const Index = () => {
     localStorage.setItem(key, JSON.stringify(value));
   };
 
-  
+
 
   // Materials data with detailed information
 
   const materialsData = [
 
-    { 
+    {
 
-      name: 'Cotton', 
+      name: 'Cotton',
 
-      icon: 'ðŸŒ±', 
+      icon: 'CT',
 
-      recyclable: true, 
+      recyclable: true,
 
-      biodegradable: true, 
+      biodegradable: true,
 
       impact: 'Moderate',
 
@@ -126,15 +127,15 @@ const Index = () => {
 
     },
 
-    { 
+    {
 
-      name: 'Denim', 
+      name: 'Denim',
 
-      icon: 'ðŸ‘–', 
+      icon: 'DN',
 
-      recyclable: true, 
+      recyclable: true,
 
-      biodegradable: true, 
+      biodegradable: true,
 
       impact: 'High',
 
@@ -148,15 +149,15 @@ const Index = () => {
 
     },
 
-    { 
+    {
 
-      name: 'Polyester', 
+      name: 'Polyester',
 
-      icon: 'ðŸ­', 
+      icon: 'PE',
 
-      recyclable: true, 
+      recyclable: true,
 
-      biodegradable: false, 
+      biodegradable: false,
 
       impact: 'High',
 
@@ -170,15 +171,15 @@ const Index = () => {
 
     },
 
-    { 
+    {
 
-      name: 'Silk', 
+      name: 'Silk',
 
-      icon: 'ðŸŽ­', 
+      icon: 'SK',
 
-      recyclable: false, 
+      recyclable: false,
 
-      biodegradable: true, 
+      biodegradable: true,
 
       impact: 'Low',
 
@@ -192,15 +193,15 @@ const Index = () => {
 
     },
 
-    { 
+    {
 
-      name: 'Wool', 
+      name: 'Wool',
 
-      icon: 'ðŸ‘', 
+      icon: 'WL',
 
-      recyclable: true, 
+      recyclable: true,
 
-      biodegradable: true, 
+      biodegradable: true,
 
       impact: 'Moderate',
 
@@ -214,15 +215,15 @@ const Index = () => {
 
     },
 
-    { 
+    {
 
-      name: 'Leather', 
+      name: 'Leather',
 
-      icon: 'ðŸ‘œ', 
+      icon: 'LT',
 
-      recyclable: false, 
+      recyclable: false,
 
-      biodegradable: true, 
+      biodegradable: true,
 
       impact: 'High',
 
@@ -236,15 +237,15 @@ const Index = () => {
 
     },
 
-    { 
+    {
 
-      name: 'Nylon', 
+      name: 'Nylon',
 
-      icon: 'ðŸ§¦', 
+      icon: 'NY',
 
-      recyclable: true, 
+      recyclable: true,
 
-      biodegradable: false, 
+      biodegradable: false,
 
       impact: 'High',
 
@@ -258,15 +259,15 @@ const Index = () => {
 
     },
 
-    { 
+    {
 
-      name: 'Linen', 
+      name: 'Linen',
 
-      icon: 'â˜˜ï¸', 
+      icon: 'LN',
 
-      recyclable: true, 
+      recyclable: true,
 
-      biodegradable: true, 
+      biodegradable: true,
 
       impact: 'Low',
 
@@ -280,15 +281,15 @@ const Index = () => {
 
     },
 
-    { 
+    {
 
-      name: 'Mixed/Blended', 
+      name: 'Mixed/Blended',
 
-      icon: 'ðŸŽ¨', 
+      icon: 'MX',
 
-      recyclable: false, 
+      recyclable: false,
 
-      biodegradable: false, 
+      biodegradable: false,
 
       impact: 'Varies',
 
@@ -576,7 +577,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
 
 
-  const handlePickupSubmit = () => {
+  const handlePickupSubmit = async () => {
 
     if (!pickupForm.address || !pickupForm.date || !pickupForm.time || !pickupForm.amount) {
 
@@ -586,7 +587,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
     }
 
-    
+
 
     const pickup = {
       ...pickupForm,
@@ -594,7 +595,14 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
       status: 'Scheduled',
       createdAt: new Date().toISOString()
     };
-    const nextPickups = [pickup, ...scheduledPickups].slice(0, 5);
+    let savedPickup = pickup;
+    try {
+      const response = await createPickup(pickup);
+      savedPickup = response.pickup;
+    } catch {
+      toast.warning('Backend unavailable. Pickup saved locally for this browser.');
+    }
+    const nextPickups = [savedPickup, ...scheduledPickups].slice(0, 5);
     setScheduledPickups(nextPickups);
     saveLocalCollection('fabricSort.pickups', nextPickups);
 
@@ -620,7 +628,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
   // Marketplace functionality
 
-  const handleBid = (itemId: string, currentPrice: number) => {
+  const handleBid = async (itemId: string, currentPrice: number) => {
 
     const newBid = currentPrice + 1;
     const nextBids = {
@@ -629,12 +637,17 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
     };
     setBids(nextBids);
     localStorage.setItem('fabricSort.bids', JSON.stringify(nextBids));
+    try {
+      await placeBid({ itemId, amount: newBid });
+    } catch {
+      toast.warning('Backend unavailable. Bid saved locally for this browser.');
+    }
 
     toast.success(`Bid placed: $${newBid}`);
 
   };
 
-  const handleQuoteGenerated = () => {
+  const handleQuoteGenerated = async () => {
     if (calculateTotalWeight() === 0) {
       toast.error('Please add at least one fabric type');
       return;
@@ -648,7 +661,14 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
       payout: calculateTotalValue() * 0.95,
       createdAt: new Date().toISOString()
     };
-    const nextQuotes = [quote, ...quoteHistory].slice(0, 5);
+    let savedQuote = quote;
+    try {
+      const response = await createQuote(quote);
+      savedQuote = response.quote;
+    } catch {
+      toast.warning('Backend unavailable. Quote saved locally for this browser.');
+    }
+    const nextQuotes = [savedQuote, ...quoteHistory].slice(0, 5);
     setQuoteHistory(nextQuotes);
     saveLocalCollection('fabricSort.quotes', nextQuotes);
     const amount =
@@ -660,7 +680,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
     toast.success('Quote saved. Pickup form has been pre-filled with the estimated weight.');
   };
 
-  const handlePartnerApplication = () => {
+  const handlePartnerApplication = async () => {
     const name = window.prompt('Partner organization name');
     if (!name) return;
 
@@ -670,13 +690,20 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
       status: 'Pending review',
       createdAt: new Date().toISOString()
     };
-    const nextApplications = [application, ...partnerApplications].slice(0, 5);
+    let savedApplication = application;
+    try {
+      const response = await createPartnerApplication(application);
+      savedApplication = response.application;
+    } catch {
+      toast.warning('Backend unavailable. Application saved locally for this browser.');
+    }
+    const nextApplications = [savedApplication, ...partnerApplications].slice(0, 5);
     setPartnerApplications(nextApplications);
     saveLocalCollection('fabricSort.partners', nextApplications);
     toast.success(`${name} added to partner applications.`);
   };
 
-  const handleCreateListing = () => {
+  const handleCreateListing = async () => {
     const title = window.prompt('Listing title');
     if (!title) return;
 
@@ -698,7 +725,14 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
       timeLeft: 'Just listed',
       condition: 'Used'
     };
-    const nextListings = [listing, ...customListings].slice(0, 8);
+    let savedListing = listing;
+    try {
+      const response = await createListing(listing);
+      savedListing = response.listing;
+    } catch {
+      toast.warning('Backend unavailable. Listing saved locally for this browser.');
+    }
+    const nextListings = [savedListing, ...customListings].slice(0, 8);
     setCustomListings(nextListings);
     saveLocalCollection('fabricSort.listings', nextListings);
     toast.success('Listing added to the marketplace.');
@@ -734,7 +768,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
     { area: "Sector 44", schedule: "Tue, Fri", nextPickup: "Tuesday 3PM", status: "Active" }
 
-  ].filter(route => 
+  ].filter(route =>
 
     route.area.toLowerCase().includes(searchQuery.toLowerCase())
 
@@ -752,7 +786,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
     }
 
-    
+
 
     if (!selectedFile) {
 
@@ -762,7 +796,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
     }
 
-    
+
 
     setIsAnalyzing(true);
 
@@ -774,7 +808,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
       const data = await classifyFabricImage(selectedFile);
 
-      
+
 
       // Check the structure of the response
 
@@ -865,7 +899,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
             <p className="text-2xl text-white/95 mt-8 max-w-4xl mx-auto leading-relaxed font-medium drop-shadow-lg">
 
-              Serving all sectors of Chandigarh. Upload a photo of any textile or fabric waste. 
+              Serving all sectors of Chandigarh. Upload a photo of any textile or fabric waste.
 
               Our AI identifies material and tells you exactly how to recycle or repurpose it responsibly.
 
@@ -935,7 +969,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
             <div className="flex justify-center">
 
-              <Button 
+              <Button
 
                 onClick={() => {
 
@@ -1169,7 +1203,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
         </div>
 
-        
+
 
         <div className="relative container mx-auto px-4">
 
@@ -1219,7 +1253,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                 <div className="text-5xl font-bold text-white mb-2">2.5M</div>
 
-                <div className="text-white/80 font-medium">kg COâ‚‚ Saved</div>
+                <div className="text-white/80 font-medium">kg CO2 Saved</div>
 
                 <div className="text-white/60 text-sm mt-1">Environmental impact</div>
 
@@ -1317,7 +1351,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                     <div className="text-gray-600">
 
-                      <span className="font-medium">Environmental Impact:</span> 
+                      <span className="font-medium">Environmental Impact:</span>
 
                       <span className={`ml-1 px-2 py-1 rounded-full text-xs ${
 
@@ -1357,7 +1391,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                   </div>
 
-                  <button 
+                  <button
 
                     onClick={() => toast.success(`Detailed guide for ${material.name} coming soon!`)}
 
@@ -1365,7 +1399,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                   >
 
-                    Learn More â†’
+                    Learn More -&gt;
 
                   </button>
 
@@ -1415,7 +1449,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                 <div className="w-16 h-16 rounded-2xl bg-gradient-to-r from-blue-500 to-cyan-500 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
 
-                  <span className="text-2xl">ðŸ’§</span>
+                  <span className="text-2xl">WTR</span>
 
                 </div>
 
@@ -1465,7 +1499,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                 <div className="w-16 h-16 rounded-2xl bg-gradient-to-r from-green-500 to-emerald-500 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
 
-                  <span className="text-2xl">ðŸŒ¿</span>
+                  <span className="text-2xl">CLN</span>
 
                 </div>
 
@@ -1515,7 +1549,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                 <div className="w-16 h-16 rounded-2xl bg-gradient-to-r from-orange-500 to-red-500 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
 
-                  <span className="text-2xl">â˜€ï¸</span>
+                  <span className="text-2xl">DRY</span>
 
                 </div>
 
@@ -1573,7 +1607,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                   <div className="bg-white rounded-xl p-4">
 
-                    <div className="font-semibold text-purple-700 mb-2">ðŸ‘• Cotton</div>
+                    <div className="font-semibold text-purple-700 mb-2">Cotton</div>
 
                     <div className="text-sm text-gray-600">Machine wash cold, tumble dry low</div>
 
@@ -1581,7 +1615,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                   <div className="bg-white rounded-xl p-4">
 
-                    <div className="font-semibold text-blue-700 mb-2">ðŸ‘– Denim</div>
+                    <div className="font-semibold text-blue-700 mb-2">Denim</div>
 
                     <div className="text-sm text-gray-600">Wash inside out, air dry recommended</div>
 
@@ -1589,7 +1623,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                   <div className="bg-white rounded-xl p-4">
 
-                    <div className="font-semibold text-green-700 mb-2">ðŸ§¦ Wool</div>
+                    <div className="font-semibold text-green-700 mb-2">Wool</div>
 
                     <div className="text-sm text-gray-600">Hand wash cold, lay flat to dry</div>
 
@@ -1597,7 +1631,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                   <div className="bg-white rounded-xl p-4">
 
-                    <div className="font-semibold text-pink-700 mb-2">ðŸŽ­ Silk</div>
+                    <div className="font-semibold text-pink-700 mb-2">Silk</div>
 
                     <div className="text-sm text-gray-600">Dry clean only or hand wash gently</div>
 
@@ -1631,7 +1665,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
         </div>
 
-        
+
 
         <div className="relative container mx-auto px-4">
 
@@ -1649,7 +1683,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
             </p>
 
-            
+
 
             <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-8 border border-white/20">
 
@@ -1659,7 +1693,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                   <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-4">
 
-                    <span className="text-2xl">ðŸ‘•</span>
+                    <span className="text-2xl">CT</span>
 
                   </div>
 
@@ -1675,13 +1709,13 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                   <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-4">
 
-                    <span className="text-2xl">âš¡</span>
+                    <span className="text-2xl">PWR</span>
 
                   </div>
 
                   <div className="text-3xl font-bold text-white mb-2">7kg</div>
 
-                  <div className="text-white/80 font-medium">COâ‚‚ Reduced</div>
+                  <div className="text-white/80 font-medium">CO2 Reduced</div>
 
                   <div className="text-white/60 text-sm mt-1">Per kg of recycled polyester</div>
 
@@ -1691,7 +1725,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                   <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-4">
 
-                    <span className="text-2xl">ðŸŒ</span>
+                    <span className="text-2xl">GLB</span>
 
                   </div>
 
@@ -1705,7 +1739,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
               </div>
 
-              
+
 
               <div className="mt-8">
 
@@ -1790,7 +1824,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                           <div className="font-semibold text-gray-800">{location.name}</div>
 
-                          <div className="text-sm text-gray-600">{location.type} â€¢ {location.distance}</div>
+                          <div className="text-sm text-gray-600">{location.type} - {location.distance}</div>
 
                         </div>
 
@@ -1800,7 +1834,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                         <div className="flex items-center gap-1 text-yellow-500 text-sm">
 
-                          <span>â­</span>
+                          <span>Star</span>
 
                           <span className="font-medium">{location.rating}</span>
 
@@ -1824,9 +1858,9 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                 <div className="space-y-4">
 
-                  <input 
+                  <input
 
-                    type="text" 
+                    type="text"
 
                     placeholder="Enter your ZIP code or address"
 
@@ -1854,7 +1888,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                 </div>
 
-                
+
 
                 <div className="mt-8 p-4 bg-white/10 rounded-xl backdrop-blur-sm">
 
@@ -1906,7 +1940,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
             <p className="text-xl text-gray-600 font-light">
 
-              Take a clear photo of the fabric â€” the closer, the better
+              Take a clear photo of the fabric - the closer, the better
 
             </p>
 
@@ -2022,7 +2056,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
               <div className="bg-white rounded-3xl shadow-xl p-8 border border-emerald-100">
 
-                <button 
+                <button
 
                   onClick={() => setSelectedBlogPost(null)}
 
@@ -2030,7 +2064,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                 >
 
-                  â† Back to Blog
+                  &lt;- Back to Blog
 
                 </button>
 
@@ -2110,7 +2144,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                         <div className="absolute inset-0 flex items-center justify-center">
 
-                          <span className="text-6xl">{index === 0 ? 'ðŸŒ' : index === 1 ? 'â™»ï¸' : 'ðŸ‘—'}</span>
+                          <span className="text-6xl">{index === 0 ? 'Planet' : index === 1 ? 'Recycle' : 'Dress'}</span>
 
                         </div>
 
@@ -2158,7 +2192,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                         </p>
 
-                        <button 
+                        <button
 
                           onClick={() => setSelectedBlogPost(post.id)}
 
@@ -2182,7 +2216,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                         >
 
-                          Read More â†’
+                          Read More -&gt;
 
                         </button>
 
@@ -2198,7 +2232,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                 <div className="text-center mt-12">
 
-                  <button 
+                  <button
 
                     onClick={() => toast.success('More articles coming soon!')}
 
@@ -2240,7 +2274,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
         </div>
 
-        
+
 
         <div className="relative container mx-auto px-4">
 
@@ -2248,7 +2282,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
             <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white font-semibold mb-6">
 
-              <span className="text-2xl">ðŸ†</span>
+              <span className="text-2xl">AWD</span>
 
               Join the Challenge
 
@@ -2266,7 +2300,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
             </p>
 
-            
+
 
             <div className="grid md:grid-cols-3 gap-6 mb-12">
 
@@ -2274,7 +2308,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                 <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-4">
 
-                  <span className="text-2xl">ðŸŽ¯</span>
+                  <span className="text-2xl">GO</span>
 
                 </div>
 
@@ -2290,7 +2324,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                 <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-4">
 
-                  <span className="text-2xl">ðŸŒ±</span>
+                  <span className="text-2xl">GRN</span>
 
                 </div>
 
@@ -2306,7 +2340,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                 <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-4">
 
-                  <span className="text-2xl">ðŸŽ</span>
+                  <span className="text-2xl">GFT</span>
 
                 </div>
 
@@ -2320,7 +2354,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
             </div>
 
-            
+
 
             <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-8 border border-white/20">
 
@@ -2422,7 +2456,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
               </div>
 
-              
+
 
               <div className="mt-8">
 
@@ -2458,7 +2492,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
         </div>
 
-        
+
 
         <div className="relative container mx-auto px-4">
 
@@ -2470,7 +2504,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                 <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white font-semibold mb-6">
 
-                  <span className="text-2xl">ðŸšš</span>
+                  <span className="text-2xl">TRK</span>
 
                   Free Pickup Service
 
@@ -2488,7 +2522,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                 </p>
 
-                
+
 
                 <div className="space-y-4 mb-8">
 
@@ -2548,7 +2582,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                 </div>
 
-                
+
 
                 <button className="px-8 py-3 bg-white text-emerald-600 font-semibold rounded-xl hover:bg-gray-100 transition-colors duration-300">
 
@@ -2558,7 +2592,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
               </div>
 
-              
+
 
               <div id="pickup-form" className="bg-white/10 backdrop-blur-sm rounded-3xl p-8 border border-white/20">
 
@@ -2570,9 +2604,9 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                     <label className="block text-white/80 text-sm font-medium mb-2">Your Address</label>
 
-                    <input 
+                    <input
 
-                      type="text" 
+                      type="text"
 
                       placeholder="Enter your full address"
 
@@ -2592,9 +2626,9 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                       <label className="block text-white/80 text-sm font-medium mb-2">Pickup Date</label>
 
-                      <input 
+                      <input
 
-                        type="date" 
+                        type="date"
 
                         value={pickupForm.date}
 
@@ -2610,7 +2644,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                       <label className="block text-white/80 text-sm font-medium mb-2">Preferred Time</label>
 
-                      <select 
+                      <select
 
                         value={pickupForm.time}
 
@@ -2638,7 +2672,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                     <label className="block text-white/80 text-sm font-medium mb-2">Estimated Fabric Amount</label>
 
-                    <select 
+                    <select
 
                       value={pickupForm.amount}
 
@@ -2666,7 +2700,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                     <label className="block text-white/80 text-sm font-medium mb-2">Special Instructions</label>
 
-                    <textarea 
+                    <textarea
 
                       placeholder="Any special access instructions or details..."
 
@@ -2682,7 +2716,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                   </div>
 
-                  <button 
+                  <button
 
                     onClick={handlePickupSubmit}
 
@@ -2756,7 +2790,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                 <div className="w-16 h-16 rounded-2xl bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center mx-auto mb-4">
 
-                  <span className="text-2xl">ðŸŒ</span>
+                  <span className="text-2xl">GLB</span>
 
                 </div>
 
@@ -2772,7 +2806,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                 <div className="w-16 h-16 rounded-2xl bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center mx-auto mb-4">
 
-                  <span className="text-2xl">â™»ï¸</span>
+                  <span className="text-2xl">RC</span>
 
                 </div>
 
@@ -2788,7 +2822,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                 <div className="w-16 h-16 rounded-2xl bg-gradient-to-r from-pink-500 to-red-500 flex items-center justify-center mx-auto mb-4">
 
-                  <span className="text-2xl">ðŸ’§</span>
+                  <span className="text-2xl">WTR</span>
 
                 </div>
 
@@ -2804,7 +2838,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                 <div className="w-16 h-16 rounded-2xl bg-gradient-to-r from-red-500 to-orange-500 flex items-center justify-center mx-auto mb-4">
 
-                  <span className="text-2xl">ðŸ­</span>
+                  <span className="text-2xl">IND</span>
 
                 </div>
 
@@ -2828,7 +2862,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
               </div>
 
-              
+
 
               <div className="p-6">
 
@@ -2842,17 +2876,17 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                       {[
 
-                        { material: 'Cotton', price: '$3.50/kg', icon: 'ðŸ‘•' },
+                        { material: 'Cotton', price: '$3.50/kg', icon: 'CT' },
 
-                        { material: 'Denim', price: '$4.50/kg', icon: 'ðŸ‘–' },
+                        { material: 'Denim', price: '$4.50/kg', icon: 'DN' },
 
-                        { material: 'Polyester', price: '$2.00/kg', icon: 'ðŸ§¶' },
+                        { material: 'Polyester', price: '$2.00/kg', icon: 'PE' },
 
-                        { material: 'Wool', price: '$6.00/kg', icon: 'ðŸ‘' },
+                        { material: 'Wool', price: '$6.00/kg', icon: 'WL' },
 
-                        { material: 'Silk', price: '$8.00/kg', icon: 'ðŸŽ­' },
+                        { material: 'Silk', price: '$8.00/kg', icon: 'SK' },
 
-                        { material: 'Linen', price: '$5.50/kg', icon: 'â˜˜ï¸' }
+                        { material: 'Linen', price: '$5.50/kg', icon: 'LN' }
 
                       ].map((item, index) => (
 
@@ -2874,11 +2908,11 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                           <div className="flex items-center gap-2">
 
-                            <input 
+                            <input
 
-                              type="number" 
+                              type="number"
 
-                              placeholder="kg" 
+                              placeholder="kg"
 
                               className="w-16 px-2 py-1 border border-gray-300 rounded text-center"
 
@@ -2908,7 +2942,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                   </div>
 
-                  
+
 
                   <div>
 
@@ -3030,7 +3064,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
         </div>
 
-        
+
 
         <div className="relative container mx-auto px-4">
 
@@ -3040,7 +3074,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
               <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white font-semibold mb-6">
 
-                <span className="text-2xl">ðŸ¤</span>
+                <span className="text-2xl">NET</span>
 
                 Our Network
 
@@ -3068,7 +3102,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                 <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-4">
 
-                  <span className="text-2xl">ðŸ¢</span>
+                  <span className="text-2xl">ORG</span>
 
                 </div>
 
@@ -3084,7 +3118,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                 <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-4">
 
-                  <span className="text-2xl">ðŸ‘¥</span>
+                  <span className="text-2xl">VOL</span>
 
                 </div>
 
@@ -3100,7 +3134,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                 <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-4">
 
-                  <span className="text-2xl">ðŸ“</span>
+                  <span className="text-2xl">PIN</span>
 
                 </div>
 
@@ -3126,7 +3160,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                   <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-4">
 
-                    <span className="text-2xl">ðŸ«</span>
+                    <span className="text-2xl">SCH</span>
 
                   </div>
 
@@ -3140,7 +3174,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                   <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-4">
 
-                    <span className="text-2xl">ðŸ¢</span>
+                    <span className="text-2xl">OFF</span>
 
                   </div>
 
@@ -3154,7 +3188,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                   <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-4">
 
-                    <span className="text-2xl">ðŸ›ï¸</span>
+                    <span className="text-2xl">RTL</span>
 
                   </div>
 
@@ -3168,7 +3202,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                   <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-4">
 
-                    <span className="text-2xl">ðŸ˜ï¸</span>
+                    <span className="text-2xl">RWA</span>
 
                   </div>
 
@@ -3180,7 +3214,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
               </div>
 
-              
+
 
               <div className="mt-8 text-center">
 
@@ -3251,9 +3285,9 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                   <div className="flex gap-2">
 
-                    <input 
+                    <input
 
-                      type="text" 
+                      type="text"
 
                       placeholder="Search Chandigarh sectors..."
 
@@ -3277,7 +3311,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
               </div>
 
-              
+
 
               <div className="p-6">
 
@@ -3293,9 +3327,9 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                         <span className={`px-2 py-1 text-xs rounded-full font-medium ${
 
-                          route.status === "Active" 
+                          route.status === "Active"
 
-                            ? "bg-green-100 text-green-700" 
+                            ? "bg-green-100 text-green-700"
 
                             : "bg-yellow-100 text-yellow-700"
 
@@ -3327,7 +3361,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                       </div>
 
-                      <button 
+                      <button
 
                         onClick={() => showRouteSchedule(route)}
 
@@ -3381,7 +3415,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
         </div>
 
-        
+
 
         <div className="relative container mx-auto px-4">
 
@@ -3391,7 +3425,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
               <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white font-semibold mb-6">
 
-                <span className="text-2xl">ðŸŒ</span>
+                <span className="text-2xl">GLB</span>
 
                 Our Impact
 
@@ -3419,7 +3453,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                 <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-4">
 
-                  <span className="text-2xl">â™»ï¸</span>
+                  <span className="text-2xl">RC</span>
 
                 </div>
 
@@ -3435,7 +3469,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                 <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-4">
 
-                  <span className="text-2xl">ðŸ‘¥</span>
+                  <span className="text-2xl">USR</span>
 
                 </div>
 
@@ -3451,7 +3485,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                 <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-4">
 
-                  <span className="text-2xl">ðŸŒ³</span>
+                  <span className="text-2xl">TRE</span>
 
                 </div>
 
@@ -3467,7 +3501,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                 <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-4">
 
-                  <span className="text-2xl">ðŸ’§</span>
+                  <span className="text-2xl">WTR</span>
 
                 </div>
 
@@ -3503,11 +3537,11 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                         <div className="flex-1 bg-white/20 rounded-full h-4 relative overflow-hidden">
 
-                          <div 
+                          <div
 
-                            className="h-full bg-gradient-to-r from-emerald-400 to-green-400 rounded-full transition-all duration-500" 
+                            className="h-full bg-gradient-to-r from-emerald-400 to-green-400 rounded-full transition-all duration-500"
 
-                            style={{width: `${Math.max(30, 60 + index * 8)}%`}} 
+                            style={{width: `${Math.max(30, 60 + index * 8)}%`}}
 
                           />
 
@@ -3535,7 +3569,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                         <div className="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center">
 
-                          <span className="text-white text-sm">ðŸ¢</span>
+                          <span className="text-white text-sm">OFF</span>
 
                         </div>
 
@@ -3553,7 +3587,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                         <div className="w-8 h-8 rounded-lg bg-blue-500 flex items-center justify-center">
 
-                          <span className="text-white text-sm">ðŸ«</span>
+                          <span className="text-white text-sm">SCH</span>
 
                         </div>
 
@@ -3571,7 +3605,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                         <div className="w-8 h-8 rounded-lg bg-purple-500 flex items-center justify-center">
 
-                          <span className="text-white text-sm">ðŸ˜ï¸</span>
+                          <span className="text-white text-sm">RWA</span>
 
                         </div>
 
@@ -3615,7 +3649,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
             <p className="text-xl text-gray-600 font-light">
 
-              Take a clear photo of the fabric â€” the closer, the better
+              Take a clear photo of the fabric - the closer, the better
 
             </p>
 
@@ -3671,7 +3705,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                   </div>
 
-                  
+
 
                   {!isAnalyzing && !result && (
 
@@ -3689,15 +3723,15 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                   )}
 
-                  
+
 
                   {isAnalyzing && <AnalyzingState />}
 
-                  
+
 
                   {result && <ClassificationResult result={result} />}
 
-                  
+
 
                   {result && (
 
@@ -3761,7 +3795,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                 <div className="w-16 h-16 rounded-2xl bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center mx-auto mb-4">
 
-                  <span className="text-2xl">ðŸ›ï¸</span>
+                  <span className="text-2xl">SHOP</span>
 
                 </div>
 
@@ -3777,7 +3811,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                 <div className="w-16 h-16 rounded-2xl bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center mx-auto mb-4">
 
-                  <span className="text-2xl">ðŸ‘¥</span>
+                  <span className="text-2xl">USR</span>
 
                 </div>
 
@@ -3793,7 +3827,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                 <div className="w-16 h-16 rounded-2xl bg-gradient-to-r from-pink-500 to-red-500 flex items-center justify-center mx-auto mb-4">
 
-                  <span className="text-2xl">â™»ï¸</span>
+                  <span className="text-2xl">RC</span>
 
                 </div>
 
@@ -3809,7 +3843,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                 <div className="w-16 h-16 rounded-2xl bg-gradient-to-r from-red-500 to-orange-500 flex items-center justify-center mx-auto mb-4">
 
-                  <span className="text-2xl">â­</span>
+                  <span className="text-2xl">RAT</span>
 
                 </div>
 
@@ -3886,7 +3920,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
               </div>
 
-              
+
 
               <div className="p-6">
 
@@ -3896,15 +3930,15 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                     const marketplaceItems = [
 
-                      { 
+                      {
 
                         id: 'item1',
 
-                        title: "Premium Organic Cotton Lot", 
+                        title: "Premium Organic Cotton Lot",
 
-                        price: 45, 
+                        price: 45,
 
-                        image: "ðŸŒ±", 
+                        image: "CT",
 
                         seller: "EcoTextiles Pro",
 
@@ -3918,15 +3952,15 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                       },
 
-                      { 
+                      {
 
                         id: 'item2',
 
-                        title: "Vintage Denim Collection", 
+                        title: "Vintage Denim Collection",
 
-                        price: 28, 
+                        price: 28,
 
-                        image: "ðŸ‘–", 
+                        image: "DN",
 
                         seller: "RetroFashion",
 
@@ -3940,15 +3974,15 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                       },
 
-                      { 
+                      {
 
                         id: 'item3',
 
-                        title: "Upcycled Silk Scarves Set", 
+                        title: "Upcycled Silk Scarves Set",
 
-                        price: 35, 
+                        price: 35,
 
-                        image: "ðŸŽ­", 
+                        image: "SK",
 
                         seller: "GreenCrafts",
 
@@ -3962,15 +3996,15 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                       },
 
-                      { 
+                      {
 
                         id: 'item4',
 
-                        title: "Bulk Polyester Fabric Roll", 
+                        title: "Bulk Polyester Fabric Roll",
 
-                        price: 22, 
+                        price: 22,
 
-                        image: "â™»ï¸", 
+                        image: "RC",
 
                         seller: "FabricWholesale",
 
@@ -3984,15 +4018,15 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                       },
 
-                      { 
+                      {
 
                         id: 'item5',
 
-                        title: "Hand-Dyed Linen Bundle", 
+                        title: "Hand-Dyed Linen Bundle",
 
-                        price: 52, 
+                        price: 52,
 
-                        image: "â˜˜ï¸", 
+                        image: "LN",
 
                         seller: "NaturalDyes Co",
 
@@ -4006,15 +4040,15 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                       },
 
-                      { 
+                      {
 
                         id: 'item6',
 
-                        title: "Wool Sweater Yarn Lot", 
+                        title: "Wool Sweater Yarn Lot",
 
-                        price: 38, 
+                        price: 38,
 
-                        image: "ðŸ‘", 
+                        image: "WL",
 
                         seller: "CozyYarns",
 
@@ -4028,15 +4062,15 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                       },
 
-                      { 
+                      {
 
                         id: 'item7',
 
-                        title: "Designer Fabric Remnants", 
+                        title: "Designer Fabric Remnants",
 
-                        price: 67, 
+                        price: 67,
 
-                        image: "ðŸŽ¨", 
+                        image: "DS",
 
                         seller: "LuxuryTextiles",
 
@@ -4050,15 +4084,15 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                       },
 
-                      { 
+                      {
 
                         id: 'item8',
 
-                        title: "Recycled Canvas Fabric", 
+                        title: "Recycled Canvas Fabric",
 
-                        price: 19, 
+                        price: 19,
 
-                        image: "ðŸ•ï¸", 
+                        image: "CV",
 
                         seller: "EcoCanvas",
 
@@ -4169,7 +4203,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                             <div className="flex items-center gap-1 text-sm">
 
-                              <span className="text-yellow-500">â­</span>
+                              <span className="text-yellow-500">Star</span>
 
                               <span className="font-medium">{item.rating}</span>
 
@@ -4181,7 +4215,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                             <span className="text-gray-600">{getCurrentBids(item)} bids</span>
 
-                            <button 
+                            <button
 
                               onClick={() => handleBid(item.id, getCurrentPrice(item))}
 
@@ -4207,7 +4241,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
               </div>
 
-              
+
 
               <div className="p-6 border-t border-gray-100">
 
@@ -4289,7 +4323,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                     {[1, 2, 3, 4, 5].map((star) => (
 
-                      <div key={star} className="w-5 h-5 text-yellow-400">â­</div>
+                      <div key={star} className="w-5 h-5 text-yellow-400">*</div>
 
                     ))}
 
@@ -4335,7 +4369,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                     {[1, 2, 3, 4, 5].map((star) => (
 
-                      <div key={star} className="w-5 h-5 text-yellow-400">â­</div>
+                      <div key={star} className="w-5 h-5 text-yellow-400">*</div>
 
                     ))}
 
@@ -4381,7 +4415,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                     {[1, 2, 3, 4, 5].map((star) => (
 
-                      <div key={star} className="w-5 h-5 text-yellow-400">â­</div>
+                      <div key={star} className="w-5 h-5 text-yellow-400">*</div>
 
                     ))}
 
@@ -4500,6 +4534,4 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
 
 export default Index;
-
-
 

@@ -18,13 +18,40 @@ const ALLOWED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
 
 // Middleware with CORS
 app.use(cors({
-  origin: ['http://localhost:8080', 'http://localhost:3000', 'http://127.0.0.1:8080', 'http://localhost:5173', 'https://recycle-fabrics-main.onrender.com'],
+  origin: [
+    'http://localhost:8080',
+    'http://localhost:3000',
+    'http://127.0.0.1:8080',
+    'http://localhost:5173',
+    'https://recycle-fabrics-main.onrender.com',
+    'https://athiestatom.github.io'
+  ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+
+const appData = {
+  pickups: [],
+  quotes: [],
+  partners: [],
+  listings: [],
+  bids: [],
+};
+
+const addRecord = (collection, payload) => {
+  const record = {
+    id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    status: 'received',
+    createdAt: new Date().toISOString(),
+    ...payload,
+  };
+  appData[collection].unshift(record);
+  appData[collection] = appData[collection].slice(0, 100);
+  return record;
+};
 
 const storage = multer.memoryStorage();
 const upload = multer({
@@ -160,6 +187,35 @@ app.get('/api/health', (req, res) => res.json({
   api_version: GEMINI_API_VERSION,
   model_ready: true 
 }));
+
+app.get('/api/pickups', (req, res) => res.json({ pickups: appData.pickups }));
+app.post('/api/pickups', (req, res) => {
+  const pickup = addRecord('pickups', { ...req.body, status: 'Scheduled' });
+  res.status(201).json({ success: true, pickup });
+});
+
+app.get('/api/quotes', (req, res) => res.json({ quotes: appData.quotes }));
+app.post('/api/quotes', (req, res) => {
+  const quote = addRecord('quotes', req.body);
+  res.status(201).json({ success: true, quote });
+});
+
+app.get('/api/partners', (req, res) => res.json({ partners: appData.partners }));
+app.post('/api/partners', (req, res) => {
+  const application = addRecord('partners', { ...req.body, status: 'Pending review' });
+  res.status(201).json({ success: true, application });
+});
+
+app.get('/api/listings', (req, res) => res.json({ listings: appData.listings }));
+app.post('/api/listings', (req, res) => {
+  const listing = addRecord('listings', req.body);
+  res.status(201).json({ success: true, listing });
+});
+
+app.post('/api/bids', (req, res) => {
+  const bid = addRecord('bids', req.body);
+  res.status(201).json({ success: true, bid });
+});
 
 app.listen(PORT, () => {
   console.log(`Backend running on port ${PORT}`);
