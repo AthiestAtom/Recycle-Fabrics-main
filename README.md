@@ -23,7 +23,7 @@ AI-powered textile waste classification for a sustainable future.
 ### Backend
 1. cd backend
 2. npm install
-3. copy .env.example to .env and set RECYCLE_FABRIC
+3. copy .env.example to .env and set RECYCLE_FABRIC or GEMINI_API_KEY
 4. npm start
 
 ## Testing

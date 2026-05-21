@@ -55,9 +55,48 @@ const Index = () => {
 
   const [searchQuery, setSearchQuery] = useState('');
 
-  const [bids, setBids] = useState<{[key: string]: number}>({});
+  const [bids, setBids] = useState<{[key: string]: number}>(() => {
+    try {
+      return JSON.parse(localStorage.getItem('fabricSort.bids') || '{}');
+    } catch {
+      return {};
+    }
+  });
 
   const [selectedCategory, setSelectedCategory] = useState('All Items');
+  const [marketplaceSort, setMarketplaceSort] = useState('Featured');
+  const [scheduledPickups, setScheduledPickups] = useState<any[]>(() => {
+    try {
+      return JSON.parse(localStorage.getItem('fabricSort.pickups') || '[]');
+    } catch {
+      return [];
+    }
+  });
+  const [quoteHistory, setQuoteHistory] = useState<any[]>(() => {
+    try {
+      return JSON.parse(localStorage.getItem('fabricSort.quotes') || '[]');
+    } catch {
+      return [];
+    }
+  });
+  const [partnerApplications, setPartnerApplications] = useState<any[]>(() => {
+    try {
+      return JSON.parse(localStorage.getItem('fabricSort.partners') || '[]');
+    } catch {
+      return [];
+    }
+  });
+  const [customListings, setCustomListings] = useState<any[]>(() => {
+    try {
+      return JSON.parse(localStorage.getItem('fabricSort.listings') || '[]');
+    } catch {
+      return [];
+    }
+  });
+
+  const saveLocalCollection = (key: string, value: any[]) => {
+    localStorage.setItem(key, JSON.stringify(value));
+  };
 
   
 
@@ -549,6 +588,16 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
     
 
+    const pickup = {
+      ...pickupForm,
+      id: Date.now(),
+      status: 'Scheduled',
+      createdAt: new Date().toISOString()
+    };
+    const nextPickups = [pickup, ...scheduledPickups].slice(0, 5);
+    setScheduledPickups(nextPickups);
+    saveLocalCollection('fabricSort.pickups', nextPickups);
+
     toast.success('Pickup scheduled successfully! We\'ll contact you soon.');
 
     setPickupForm({
@@ -574,17 +623,89 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
   const handleBid = (itemId: string, currentPrice: number) => {
 
     const newBid = currentPrice + 1;
-
-    setBids(prev => ({
-
-      ...prev,
-
+    const nextBids = {
+      ...bids,
       [itemId]: newBid
-
-    }));
+    };
+    setBids(nextBids);
+    localStorage.setItem('fabricSort.bids', JSON.stringify(nextBids));
 
     toast.success(`Bid placed: $${newBid}`);
 
+  };
+
+  const handleQuoteGenerated = () => {
+    if (calculateTotalWeight() === 0) {
+      toast.error('Please add at least one fabric type');
+      return;
+    }
+
+    const quote = {
+      id: Date.now(),
+      quantities: fabricQuantities,
+      weight: calculateTotalWeight(),
+      value: calculateTotalValue(),
+      payout: calculateTotalValue() * 0.95,
+      createdAt: new Date().toISOString()
+    };
+    const nextQuotes = [quote, ...quoteHistory].slice(0, 5);
+    setQuoteHistory(nextQuotes);
+    saveLocalCollection('fabricSort.quotes', nextQuotes);
+    const amount =
+      quote.weight <= 5 ? 'small' :
+      quote.weight <= 15 ? 'medium' :
+      quote.weight <= 30 ? 'large' :
+      'bulk';
+    setPickupForm(prev => ({ ...prev, amount }));
+    toast.success('Quote saved. Pickup form has been pre-filled with the estimated weight.');
+  };
+
+  const handlePartnerApplication = () => {
+    const name = window.prompt('Partner organization name');
+    if (!name) return;
+
+    const application = {
+      id: Date.now(),
+      name,
+      status: 'Pending review',
+      createdAt: new Date().toISOString()
+    };
+    const nextApplications = [application, ...partnerApplications].slice(0, 5);
+    setPartnerApplications(nextApplications);
+    saveLocalCollection('fabricSort.partners', nextApplications);
+    toast.success(`${name} added to partner applications.`);
+  };
+
+  const handleCreateListing = () => {
+    const title = window.prompt('Listing title');
+    if (!title) return;
+
+    const priceInput = window.prompt('Starting price in USD');
+    const price = Number(priceInput);
+    if (!Number.isFinite(price) || price <= 0) {
+      toast.error('Please enter a valid price.');
+      return;
+    }
+
+    const listing = {
+      id: `custom-${Date.now()}`,
+      title,
+      price,
+      image: 'FS',
+      seller: 'You',
+      rating: 5,
+      bids: 0,
+      timeLeft: 'Just listed',
+      condition: 'Used'
+    };
+    const nextListings = [listing, ...customListings].slice(0, 8);
+    setCustomListings(nextListings);
+    saveLocalCollection('fabricSort.listings', nextListings);
+    toast.success('Listing added to the marketplace.');
+  };
+
+  const showRouteSchedule = (route: any) => {
+    toast.success(`${route.area}: ${route.schedule}, next pickup ${route.nextPickup}`);
   };
 
 
@@ -1588,7 +1709,10 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
               <div className="mt-8">
 
-                <button className="px-8 py-3 bg-white text-emerald-600 font-semibold rounded-xl hover:bg-gray-100 transition-colors duration-300">
+                <button
+                  onClick={() => document.getElementById('pickup-form')?.scrollIntoView({ behavior: 'smooth' })}
+                  className="px-8 py-3 bg-white text-emerald-600 font-semibold rounded-xl hover:bg-gray-100 transition-colors duration-300"
+                >
 
                   Calculate Your Impact
 
@@ -2436,7 +2560,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
               
 
-              <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-8 border border-white/20">
+              <div id="pickup-form" className="bg-white/10 backdrop-blur-sm rounded-3xl p-8 border border-white/20">
 
                 <h3 className="text-2xl font-bold text-white mb-6">Quick Pickup Form</h3>
 
@@ -2569,6 +2693,22 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
                     Book Free Pickup
 
                   </button>
+
+                  {scheduledPickups.length > 0 && (
+
+                    <div className="rounded-xl bg-white/15 p-4 text-white">
+
+                      <div className="font-semibold mb-2">Latest Booking</div>
+
+                      <div className="text-sm text-white/80">
+
+                        {scheduledPickups[0].address} - {scheduledPickups[0].date} - {scheduledPickups[0].status}
+
+                      </div>
+
+                    </div>
+
+                  )}
 
                 </div>
 
@@ -2828,21 +2968,9 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                       </div>
 
-                      <button 
+                      <button
 
-                        onClick={() => {
-
-                          if (calculateTotalWeight() === 0) {
-
-                            toast.error('Please add at least one fabric type');
-
-                            return;
-
-                          }
-
-                          toast.success('Quote generated! Proceeding to schedule pickup...');
-
-                        }}
+                        onClick={handleQuoteGenerated}
 
                         className="w-full px-4 py-3 bg-emerald-600 text-white font-semibold rounded-xl hover:bg-emerald-700 transition-colors"
 
@@ -2851,6 +2979,24 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
                         Get Quote & Schedule Pickup
 
                       </button>
+
+                      {quoteHistory.length > 0 && (
+
+                        <div className="mt-4 rounded-xl bg-white/70 p-3 text-sm text-gray-700">
+
+                          <div className="font-semibold text-gray-800 mb-2">Recent saved quote</div>
+
+                          <div className="flex justify-between">
+
+                            <span>{quoteHistory[0].weight.toFixed(1)} kg</span>
+
+                            <span className="font-semibold text-emerald-700">${quoteHistory[0].payout.toFixed(2)} payout</span>
+
+                          </div>
+
+                        </div>
+
+                      )}
 
                     </div>
 
@@ -3038,11 +3184,24 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
               <div className="mt-8 text-center">
 
-                <button className="px-8 py-3 bg-white text-indigo-600 font-semibold rounded-xl hover:bg-gray-100 transition-colors duration-300">
+                <button
+                  onClick={handlePartnerApplication}
+                  className="px-8 py-3 bg-white text-indigo-600 font-semibold rounded-xl hover:bg-gray-100 transition-colors duration-300"
+                >
 
                   Become a Partner
 
                 </button>
+
+                {partnerApplications.length > 0 && (
+
+                  <div className="mt-4 text-white/80 text-sm">
+
+                    Latest application: {partnerApplications[0].name} - {partnerApplications[0].status}
+
+                  </div>
+
+                )}
 
               </div>
 
@@ -3170,7 +3329,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                       <button 
 
-                        onClick={() => toast.success(`Schedule details for ${route.area} sent to your email!`)}
+                        onClick={() => showRouteSchedule(route)}
 
                         className="w-full mt-3 px-3 py-2 bg-indigo-100 text-indigo-700 rounded-lg font-medium hover:bg-indigo-200 transition-colors text-sm"
 
@@ -3183,6 +3342,16 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
                     </div>
 
                   ))}
+
+                  {filteredRoutes.length === 0 && (
+
+                    <div className="col-span-full rounded-2xl bg-gray-50 p-8 text-center text-gray-600">
+
+                      No routes found for this search. Try another Chandigarh sector.
+
+                    </div>
+
+                  )}
 
                 </div>
 
@@ -3664,23 +3833,35 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                   <div className="flex gap-2">
 
-                    <button className="px-4 py-2 bg-blue-600 text-white rounded-xl font-medium">All Items</button>
+                    {['All Items', 'New', 'Used', 'Vintage', 'Upcycled'].map((category) => (
 
-                    <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200">New</button>
+                      <button
+                        key={category}
+                        onClick={() => setSelectedCategory(category)}
+                        className={`px-4 py-2 rounded-xl font-medium transition-colors ${
+                          selectedCategory === category
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
 
-                    <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200">Used</button>
+                        {category}
 
-                    <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200">Vintage</button>
+                      </button>
 
-                    <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200">Upcycled</button>
+                    ))}
 
                   </div>
 
                   <div className="flex gap-2">
 
-                    <select className="px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:border-blue-500">
+                    <select
+                      value={marketplaceSort}
+                      onChange={(e) => setMarketplaceSort(e.target.value)}
+                      className="px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:border-blue-500"
+                    >
 
-                      <option>Sort: Featured</option>
+                      <option>Featured</option>
 
                       <option>Price: Low to High</option>
 
@@ -3690,7 +3871,10 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
                     </select>
 
-                    <button className="px-4 py-2 bg-green-600 text-white rounded-xl font-medium hover:bg-green-700">
+                    <button
+                      onClick={handleCreateListing}
+                      className="px-4 py-2 bg-green-600 text-white rounded-xl font-medium hover:bg-green-700"
+                    >
 
                       + List Item
 
@@ -3900,6 +4084,17 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
 
 
+                    const visibleMarketplaceItems = [...customListings, ...marketplaceItems]
+                      .filter((item) => selectedCategory === 'All Items' || item.condition === selectedCategory)
+                      .sort((a, b) => {
+                        if (marketplaceSort === 'Price: Low to High') return getCurrentPrice(a) - getCurrentPrice(b);
+                        if (marketplaceSort === 'Price: High to Low') return getCurrentPrice(b) - getCurrentPrice(a);
+                        if (marketplaceSort === 'Newest First') return String(b.id).localeCompare(String(a.id));
+                        return 0;
+                      });
+
+
+
                     const getCurrentBids = (item: typeof marketplaceItems[0]) => {
 
                       return bids[item.id] ? item.bids + 1 : item.bids;
@@ -3908,7 +4103,23 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
 
 
-                    return marketplaceItems.map((item, index) => (
+                    if (visibleMarketplaceItems.length === 0) {
+
+                      return (
+
+                        <div className="col-span-full rounded-2xl bg-gray-50 p-8 text-center text-gray-600">
+
+                          No marketplace items match this filter yet.
+
+                        </div>
+
+                      );
+
+                    }
+
+
+
+                    return visibleMarketplaceItems.map((item, index) => (
 
                       <div key={index} className="bg-gray-50 rounded-2xl overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer">
 

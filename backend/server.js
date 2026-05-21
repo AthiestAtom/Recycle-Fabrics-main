@@ -4,13 +4,15 @@ const cors = require('cors');
 const multer = require('multer');
 
 // Environment variable for Gemini API
-const GEMINI_API_KEY = process.env.RECYCLE_FABRIC;
+const GEMINI_API_KEY = process.env.RECYCLE_FABRIC || process.env.GEMINI_API_KEY;
 if (!GEMINI_API_KEY) {
-  throw new Error("RECYCLE_FABRIC API key not set in environment variables");
+  throw new Error("Gemini API key not set. Use RECYCLE_FABRIC or GEMINI_API_KEY.");
 }
 
 const app = express();
 const PORT = process.env.BACKEND_PORT || 3001;
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-3.5-flash';
+const GEMINI_API_VERSION = process.env.GEMINI_API_VERSION || 'v1';
 const MAX_IMAGE_SIZE_BYTES = 10 * 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
 
@@ -64,13 +66,16 @@ const classifyWithGemini = async (imageBuffer, mimeType) => {
   try {
     const base64Image = imageBuffer.toString('base64');
 
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+    const response = await fetch(`https://generativelanguage.googleapis.com/${GEMINI_API_VERSION}/models/${GEMINI_MODEL}:generateContent`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-goog-api-key': GEMINI_API_KEY,
+      },
       body: JSON.stringify({
         contents: [{
           parts: [{
-            text: 'Analyze this fabric image and classify it. Return a JSON response with: fabric_type, recycling_method, confidence (0-1), and description.',
+            text: 'Analyze this fabric image and classify it. Return only JSON with: fabric_type, recycling_method, confidence (0-1), and description.',
             inline_data: { mime_type: mimeType, data: base64Image }
           }]
         }]
@@ -78,7 +83,8 @@ const classifyWithGemini = async (imageBuffer, mimeType) => {
     });
 
     if (!response.ok) {
-      throw new Error(`Gemini API error: ${response.status}`);
+      const errorText = await response.text();
+      throw new Error(`Gemini API error: ${response.status} ${errorText}`);
     }
 
     const data = await response.json();
@@ -98,8 +104,8 @@ const classifyWithGemini = async (imageBuffer, mimeType) => {
     }
     throw new Error('Invalid Gemini response');
   } catch (error) {
-    console.error('Gemini error:', error);
-    return null;
+    console.error('Gemini error:', error.message);
+    return { error: error.message };
   }
 };
 
@@ -108,10 +114,11 @@ app.post('/api/classify-fabric', upload.single('image'), async (req, res) => {
     if (!req.file) return res.status(400).json({ error: 'No image file' });
 
     // Use Gemini API for classification
-    let result = await classifyWithGemini(req.file.buffer, req.file.mimetype);
+    const geminiResult = await classifyWithGemini(req.file.buffer, req.file.mimetype);
+    let result = geminiResult;
     
     // Fallback if Gemini fails
-    if (!result) {
+    if (!result || result.error) {
       result = {
         material: 'Cotton',
         confidence: 50,
@@ -119,7 +126,8 @@ app.post('/api/classify-fabric', upload.single('image'), async (req, res) => {
         biodegradable: true,
         guidance: 'Please try again or contact support.',
         tips: ['Check labels', 'Consider donating'],
-        environmental_impact: 'AI service temporarily unavailable'
+        environmental_impact: 'AI service temporarily unavailable',
+        model_error: result?.error || 'Unknown Gemini failure'
       };
       console.log('Using fallback classification');
     }
@@ -148,11 +156,12 @@ app.use((error, req, res, next) => {
 
 app.get('/api/health', (req, res) => res.json({ 
   status: 'OK', 
-  model_type: 'Google Gemini 1.5 Flash Vision API',
+  model_type: `Google Gemini Vision API (${GEMINI_MODEL})`,
+  api_version: GEMINI_API_VERSION,
   model_ready: true 
 }));
 
 app.listen(PORT, () => {
   console.log(`Backend running on port ${PORT}`);
-  console.log('Using Google Gemini API for fabric classification');
+  console.log(`Using Google Gemini API model ${GEMINI_MODEL}`);
 });

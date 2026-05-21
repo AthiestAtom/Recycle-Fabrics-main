@@ -21,6 +21,8 @@ const SENSITIVE_PATTERNS = [
   /xoxp-[A-Za-z0-9_-]{46}/, // Slack user tokens
   /AKIA[0-9A-Z]{16}/, // AWS access keys
   /-----BEGIN [A-Z]+ PRIVATE KEY-----/, // Private keys
+  /RECYCLE_FABRIC\s*=\s*['"]?AIza[A-Za-z0-9_-]{35}['"]?/,
+  /GEMINI_API_KEY\s*=\s*['"]?AIza[A-Za-z0-9_-]{35}['"]?/,
   /(?:MISTRAL|OPENAI|GEMINI|RECYCLE_FABRIC)_API_KEY\s*=\s*['"][^'"]+['"]/,
   /API_KEY\s*=\s*['"][^'"]+['"]/,
 ];
