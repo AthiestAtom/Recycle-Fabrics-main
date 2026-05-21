@@ -60,38 +60,11 @@ const VideoBackground = () => {
       {!isLoaded && (
         <div className="fixed inset-0 flex items-center justify-center bg-gradient-to-br from-emerald-600 via-teal-500 to-cyan-400" style={{ zIndex: 30 }}>
           <div className="text-white text-center">
-            <div className="text-6xl mb-4 animate-bounce">🎮</div>
-            <p className="text-xl font-bold">Loading YouTube Video...</p>
-            <p className="text-sm opacity-75">Your epic background is starting...</p>
-            <div className="mt-4 flex justify-center gap-2">
-              <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
-              <div className="w-2 h-2 bg-white rounded-full animate-pulse delay-1000"></div>
-              <div className="w-2 h-2 bg-white rounded-full animate-pulse delay-2000"></div>
-            </div>
+            <div className="text-6xl mb-4 animate-bounce">♻️</div>
+            <p className="text-xl font-bold">Loading...</p>
           </div>
         </div>
       )}
-
-      {/* Pokemon Emerald Style UI Elements */}
-      <div className="fixed top-4 left-4 bg-emerald-800/80 backdrop-blur-sm px-4 py-2 rounded-lg border-2 border-emerald-400 shadow-lg z-40" style={{ zIndex: 50 }}>
-        <div className="text-white font-bold text-sm">POKÉMON EMERALD</div>
-        <div className="text-emerald-200 text-xs">TEXTILE RECYCLING EDITION</div>
-      </div>
-      
-      <div className="fixed top-4 right-4 bg-emerald-800/80 backdrop-blur-sm px-4 py-2 rounded-lg border-2 border-emerald-400 shadow-lg z-40" style={{ zIndex: 50 }}>
-        <div className="text-white font-bold text-sm">CHANDIGARH REGION</div>
-        <div className="text-emerald-200 text-xs">SECTORS: 1-56</div>
-      </div>
-      
-      <div className="fixed bottom-4 left-4 bg-emerald-800/80 backdrop-blur-sm px-4 py-2 rounded-lg border-2 border-emerald-400 shadow-lg z-40" style={{ zIndex: 50 }}>
-        <div className="text-white font-bold text-sm">⏱️ TIME: {new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</div>
-        <div className="text-emerald-200 text-xs">📍 SECTOR 17</div>
-      </div>
-
-      <style>{`
-        .delay-1000 { animation-delay: 1s; }
-        .delay-2000 { animation-delay: 2s; }
-      `}</style>
     </div>
   );
 };
