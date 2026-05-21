@@ -1,7 +1,7 @@
 {
   "name": "fabric-classifier-api",
   "version": "1.0.0",
-  "description": "Fabric classification using local deep learning models",
+  "description": "Fabric classification using the Google Gemini Vision API",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -11,21 +11,17 @@
   "keywords": [
     "fabric",
     "classification",
-    "deep-learning",
-    "machine-learning",
-    "vision-transformer",
-    "tensorflow",
+    "gemini",
+    "vision-api",
     "recycling"
   ],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@tensorflow/tfjs": "^4.22.0",
     "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
     "express": "^5.2.1",
-    "file-type": "^18.7.0",
-    "multer": "^2.1.1",
-    "sharp": "^0.34.5"
+    "multer": "^2.1.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.14"

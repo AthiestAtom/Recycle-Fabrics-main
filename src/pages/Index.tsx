@@ -13,6 +13,7 @@ import AnalyzingState from "@/components/features/AnalyzingState";
 import VideoBackground from "@/components/common/VideoBackground";
 
 import { Button } from "@/components/ui/button";
+import { classifyFabricImage } from "@/utils/classifyFabric";
 
 
 
@@ -650,53 +651,7 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
     try {
 
-      // Create FormData to send the image file
-
-      const formData = new FormData();
-
-      formData.append('image', selectedFile);
-
-
-
-      const apiUrl = import.meta.env.VITE_API_URL || "https://fabric-classifier-api.onrender.com/api/classify-fabric";
-      console.log('Sending request to:', apiUrl);
-      console.log('Selected file:', selectedFile);
-
-      
-
-      const response = await fetch(apiUrl, {
-
-        method: 'POST',
-
-        body: formData,
-
-        mode: 'cors',
-
-        cache: 'no-cache',
-
-        headers: {
-
-          'Cache-Control': 'no-cache',
-
-          'Pragma': 'no-cache'
-
-        }
-
-      });
-
-
-
-      if (!response.ok) {
-
-        const errorText = await response.text();
-
-        throw new Error(`Server error: ${response.status}`);
-
-      }
-
-
-
-      const data = await response.json();
+      const data = await classifyFabricImage(selectedFile);
 
       
 
@@ -718,18 +673,11 @@ Remember that building a sustainable wardrobe is a journey, not a destination. S
 
     } catch (err: any) {
 
-      console.error("=== CLASSIFICATION ERROR ===");
-
       console.error("Error:", err);
-
-      console.error("Error message:", err.message);
 
       toast.error(err.message || "Failed to classify fabric. Please try again.");
 
     } finally {
-
-      console.log('=== ANALYSIS COMPLETE ===');
-
       setIsAnalyzing(false);
 
     }

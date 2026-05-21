@@ -1,6 +1,8 @@
 import { useCallback, useState } from "react";
 import { Upload, Camera, X, Image as ImageIcon, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { validateImageFile } from "@/utils/imageValidation";
 
 interface ImageUploaderProps {
   onImageSelect: (file: File, preview: string) => void;
@@ -13,7 +15,13 @@ const ImageUploader = ({ onImageSelect, selectedImage, onClear, isAnalyzing }: I
   const [isDragging, setIsDragging] = useState(false);
 
   const handleFile = useCallback((file: File) => {
-    if (!file.type.startsWith("image/")) return;
+    const validationError = validateImageFile(file);
+
+    if (validationError) {
+      toast.error(validationError);
+      return;
+    }
+
     const reader = new FileReader();
     reader.onload = (e) => {
       onImageSelect(file, e.target?.result as string);
@@ -72,7 +80,7 @@ const ImageUploader = ({ onImageSelect, selectedImage, onClear, isAnalyzing }: I
     >
       <input
         type="file"
-        accept="image/*"
+        accept="image/jpeg,image/png,image/webp"
         onChange={handleInputChange}
         className="absolute inset-0 opacity-0 cursor-pointer"
         id="fabric-upload"
@@ -97,7 +105,7 @@ const ImageUploader = ({ onImageSelect, selectedImage, onClear, isAnalyzing }: I
             {isDragging ? "Drop your fabric photo" : "Upload your fabric photo"}
           </p>
           <p className="text-gray-600 font-medium">
-            or click to browse · JPG, PNG, WebP up to 10MB
+            or click to browse - JPG, PNG, WebP up to 10MB
           </p>
         </div>
         <div className="flex gap-4 mt-4">

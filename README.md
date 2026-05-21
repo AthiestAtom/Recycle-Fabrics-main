@@ -3,7 +3,7 @@
 AI-powered textile waste classification for a sustainable future.
 
 ## Features
-- AI-based fabric identification (using local CNN model or Google Gemini)
+- AI-based fabric identification using Google Gemini Vision
 - Detailed recycling guidance
 - Environmental impact assessment
 - Fabric marketplace
@@ -11,8 +11,8 @@ AI-powered textile waste classification for a sustainable future.
 
 ## Tech Stack
 - Frontend: React, Vite, Tailwind CSS, Lucide icons
-- Backend: Express, Multer, TensorFlow.js (local), Google Gemini API (fallback)
-- Database/Functions: Supabase
+- Backend: Express, Multer, Google Gemini API, dotenv
+- Database/Functions: planned future Supabase integration
 
 ## Setup
 
@@ -23,7 +23,8 @@ AI-powered textile waste classification for a sustainable future.
 ### Backend
 1. cd backend
 2. npm install
-3. npm start
+3. copy .env.example to .env and set RECYCLE_FABRIC
+4. npm start
 
 ## Testing
 Run tests with npm test

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { Recycle } from 'lucide-react';
 
 const VideoBackground = () => {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -60,7 +61,7 @@ const VideoBackground = () => {
       {!isLoaded && (
         <div className="fixed inset-0 flex items-center justify-center bg-gradient-to-br from-emerald-600 via-teal-500 to-cyan-400" style={{ zIndex: 30 }}>
           <div className="text-white text-center">
-            <div className="text-6xl mb-4 animate-bounce">♻️</div>
+            <Recycle className="mx-auto mb-4 h-14 w-14 animate-bounce" />
             <p className="text-xl font-bold">Loading...</p>
           </div>
         </div>
