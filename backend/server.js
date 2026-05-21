@@ -5,7 +5,10 @@ const path = require('path');
 const fs = require('fs');
 
 // Environment variable for Gemini API
-const GEMINI_API_KEY = process.env.RECYCLE_FABRIC || 'AIzaSyBpPDgjbxTZ-N_As3dcZJ-yitxkyAQQGyA';
+const GEMINI_API_KEY = process.env.RECYCLE_FABRIC;
+if (!GEMINI_API_KEY) {
+  throw new Error("RECYCLE_FABRIC API key not set in environment variables");
+}
 
 const app = express();
 const PORT = process.env.BACKEND_PORT || 3001;

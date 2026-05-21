@@ -48,7 +48,7 @@
 
 **Problem:**
 ```javascript
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "AIzaSyBpPDgjbxTZ-N_As3dcZJ-yitxkyAQQGyA";
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "HARDCODED_API_KEY_HERE";
 ```
 
 **Why This Is Critical:**
